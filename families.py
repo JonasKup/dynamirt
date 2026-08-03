@@ -1,4 +1,4 @@
-from _context import _Context
+from ._context import _Context
 
 from jax.typing import ArrayLike
 import jax.numpy as jnp

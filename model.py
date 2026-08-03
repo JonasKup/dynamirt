@@ -10,8 +10,8 @@ import jax
 import jax.numpy as jnp
 from jax.typing import ArrayLike
 
-from families import Bernoulli
-from _context import _Context
+from .families import Bernoulli
+from ._context import _Context
  
     
 def gllvm(
