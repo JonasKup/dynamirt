@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Literal, Sequence
 
-from _context import _Context
+from ._context import _Context
 
 import numpy as np
 
@@ -208,10 +208,10 @@ from numpyro.contrib.hsgp.spectral_densities import diag_spectral_density_matern
 # hsgp adapted from https://num.pyro.ai/en/stable/_modules/numpyro/contrib/hsgp/approximation.html
 # numpyro's hsgp helpers are scalar in alpha/length so manual vmap is required
 def _hsgp_matern(
-    X: jax.Array,          # (n_obs, dim)
+    X: jax.Array,
     nu: float,
-    alpha: jax.Array,      # (n_groups, n_target)
-    length: jax.Array,     # (n_groups, n_target)
+    alpha: jax.Array,
+    length: jax.Array,
     ell: float | Sequence[float],
     m: int | Sequence[int],
     name: str,
@@ -258,8 +258,6 @@ class HSGP:
 
     def __call__(self, ctx: _Context, n_vars: int):
         
-        if float(jnp.abs(X).max()) > self.ell:
-            raise ValueError(f"{self.name}: predictors exceed ell={self.ell}; center and scale them or raise ell")
         
         idx, n_groups = _factorize(ctx, self.group_by, ctx.n_obs)
         n_target = n_vars if self.varies_over_variables else 1
@@ -269,6 +267,10 @@ class HSGP:
         X = jnp.stack(
             [jnp.broadcast_to(jnp.asarray(ctx.covariates[o], float), (ctx.n_obs,)) for o in overs],
             axis=-1)
+        
+        # if jnp.abs(X).max() > self.ell:
+        #     raise ValueError(f"{self.name}: predictors exceed ell={self.ell}; center and scale them or raise ell")
+
                 
         alpha = _hyper(f"{self.name}_amplitude", self.amplitude_prior,
                        n_groups, n_target,
