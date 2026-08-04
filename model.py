@@ -61,8 +61,8 @@ def gllvm(
             u += term(ctx, n_latent) # (n_obs, n_latent)
     
     loadings_matrix = loadings(ctx) # (n_latent, n_var)
-    
-    latent_contributions = u @ loadings_matrix # (n_obs, n_var)
+        
+    latent_contributions = u @ loadings_matrix.T # (n_obs, n_var)
     
     mu = eta + latent_contributions
     
