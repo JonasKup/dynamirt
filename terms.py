@@ -62,8 +62,10 @@ class Linear:
         # stack multiple covariates into single array if multiple were given
         overs = [self.predictors] if isinstance(self.predictors, str) else list(self.predictors)
         n_predictors = len(overs)
-        X = jnp.stack([jnp.broadcast_to(jnp.asarray(ctx.covariates[o], float), (ctx.n_obs,))
-                       for o in overs], axis=-1)    # (n_obs, n_predictors)
+        X = jnp.stack([ctx.covariates[o] for o in overs], axis=-1)
+
+        # X = jnp.stack([jnp.broadcast_to(jnp.asarray(ctx.covariates[o], float), (ctx.n_obs,))
+        #                for o in overs], axis=-1)    # (n_obs, n_predictors)
 
         # factorize group_by index
         if self.group_by is None:
@@ -107,7 +109,6 @@ class Linear:
 
         if self.constraint == "reference_coding":
             coef = jnp.pad(coef, ((1, 0), (0, 0), (0, 0)))
-            #coef = jnp.insert(coef, 0, 0.0, axis=0) 
 
         
         coef = numpyro.deterministic(self.name, coef) # (n_groups, n_target, n_predictors)
@@ -248,7 +249,7 @@ class HSGP:
     group_by: str | None = None
     varies_over_variables: bool = True
     
-    amplitude_by_group: bool = False
+    amplitude_by_group: bool = False # contract these into single one. Either share one or both.
     amplitude_by_variable: bool = True
     length_by_group: bool = False
     length_by_variable: bool = True
@@ -263,21 +264,11 @@ class HSGP:
         n_target = n_vars if self.varies_over_variables else 1
 
         overs = [self.predictors] if isinstance(self.predictors, str) else list(self.predictors)
+        X = jnp.stack([ctx.covariates[o] for o in overs], axis=-1)
         
-        X = jnp.stack(
-            [jnp.broadcast_to(jnp.asarray(ctx.covariates[o], float), (ctx.n_obs,)) for o in overs],
-            axis=-1)
-        
-        # if jnp.abs(X).max() > self.ell:
-        #     raise ValueError(f"{self.name}: predictors exceed ell={self.ell}; center and scale them or raise ell")
-
-                
-        alpha = _hyper(f"{self.name}_amplitude", self.amplitude_prior,
-                       n_groups, n_target,
-                       self.amplitude_by_group, self.amplitude_by_variable)
-        length = _hyper(f"{self.name}_length", self.length_prior,
-                        n_groups, n_target,
-                        self.length_by_group, self.length_by_variable)
+        # broadcast alpha and length priors to correct shapes
+        alpha = _hyper(f"{self.name}_amplitude", self.amplitude_prior, n_groups, n_target, self.amplitude_by_group, self.amplitude_by_variable)
+        length = _hyper(f"{self.name}_length", self.length_prior, n_groups, n_target, self.length_by_group, self.length_by_variable)
                 
         phi, weights = _hsgp_matern(X, self.nu, alpha, length, self.ell, self.m, self.name)
         f = jnp.einsum("nb,nvb->nv", phi, weights[idx])
