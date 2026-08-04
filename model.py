@@ -12,7 +12,7 @@ from jax.typing import ArrayLike
 
 from .families import Bernoulli
 from ._context import _Context
- 
+from .loadings import Unconstrained
     
 def gllvm(
     responses: ArrayLike,
@@ -20,6 +20,7 @@ def gllvm(
     n_latent: int=1,
     eta_regression: List[Callable]=None,
     u_regression: List[Callable]=None,
+    loadings=Unconstrained(),
     family: Callable=Bernoulli()
     ):
     
@@ -63,11 +64,11 @@ def gllvm(
         for term in u_regression:
             u += term(ctx, n_latent) # (n_obs, n_latent)
     
-    loadings = numpyro.sample("loadings", dist.Normal(0,1).expand((n_latent, n_var))) # (n_latent, n_var)
+    loadings_matrix = loadings(ctx) # (n_latent, n_var)
     
-    lv_contributions = u @ loadings # (n_obs, n_var)
+    latent_contributions = u @ loadings_matrix # (n_obs, n_var)
     
-    mu = eta + lv_contributions
+    mu = eta + latent_contributions
     
     mask = jnp.isnan(responses)
     numpyro.sample("Y", family(mu, ctx).mask(~mask), obs=jnp.where(mask, 0.0, responses))
