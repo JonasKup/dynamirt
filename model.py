@@ -11,13 +11,15 @@ from ._context import _Context
 from .loadings import Unconstrained
     
 def gllvm(
-    responses: ArrayLike,
-    covariates: Mapping[str, ArrayLike],
+    responses: None | ArrayLike = None,
+    covariates: Mapping[str, ArrayLike] = {},
     n_latent: int=1,
     eta_regression: List[Callable]=None,
     u_regression: List[Callable]=None,
     loadings=Unconstrained(),
-    family: Callable=Bernoulli()
+    family: Callable=Bernoulli(),
+    n_obs=None, # for predictive
+    n_var=None
     ):
     
     """Generalized linear latent variable model.
@@ -38,9 +40,13 @@ def gllvm(
             summed into the latent scores.
         family: called as `family(mu, ctx) -> dist.Distribution` over responses.
     """
+    # n_obs: total number of obs. Doesn't necessarily need to be number of sites/respondents in repeated measurement scenarios
+    # n_var: number of variables to simultanously regress on
+    if responses is not None:
+        n_obs, n_var = responses.shape 
     
-    n_obs = responses.shape[0]  # total number of obs. Doesn't necessarily need to be number of sites/respondents in repeated measurement scenarios
-    n_var = responses.shape[1]  # number of variables to simultanously regress on
+    n_obs = responses.shape[0]  
+    n_var = responses.shape[1]  
     
     covariates = {**covariates,
                   "one_": np.array([1.0]),  # for intercepts
@@ -66,5 +72,8 @@ def gllvm(
     
     mu = eta + latent_contributions
     
-    mask = jnp.isnan(responses)
-    numpyro.sample("Y", family(mu, ctx).mask(~mask), obs=jnp.where(mask, 0.0, responses))
+    if responses is None:
+        numpyro.sample("Y", family(mu, ctx))
+    else:
+        mask = jnp.isnan(responses)
+        numpyro.sample("Y", family(mu, ctx).mask(~mask), obs=jnp.where(mask, 0.0, responses))
