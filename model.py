@@ -1,12 +1,8 @@
-from dataclasses import dataclass
-from typing import Tuple, Literal, Mapping, List, Callable
+from typing import Mapping, List, Callable
 
 import numpyro
-import numpyro.distributions as dist
-
 import numpy as np
 
-import jax
 import jax.numpy as jnp
 from jax.typing import ArrayLike
 
