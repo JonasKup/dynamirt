@@ -6,20 +6,28 @@ from .mini_gllvm.loadings import Unconstrained
 
 from functools import partial
 
+from typing import List, Callable
+
 def dynamirt(
-    n_latent,
-    respondent_var: str,
-    time_var: str = None,
     model_type="2PL",
+    n_latent: int = 1,
     loadings=Unconstrained,
-    DIF=[],
-    
+    latent_dynamics: List[Callable] = None,
+    DIF: List[Callable]=[],
+    constrained: bool = False
 ):
     
-    theta = Linear(
-        "theta",
-        predictors="one_",
-    )
+    latent_contribution = []
+    
+    if not constrained:
+        residuals = Linear(
+            "residuals",
+            predictors="one_",
+        )
+        
+        latent_contribution += [residuals]
+    
+    latent_contribution += latent_dynamics
     
     item_intercept = Linear(
         "intercept",
@@ -30,10 +38,13 @@ def dynamirt(
         gllvm,
         n_latent=n_latent,
         full_rank_regression=[item_intercept, *DIF],
-        latent_regression=[theta],
+        latent_regression=latent_contribution,
         loadings=loadings(),
         family=Bernoulli(),
         latent_site_name="theta"
     )
     
     return model
+
+# Example:
+# model = dynamirt(model_type="2PL", n_latent=1, latent_dynamics=[HSGP("trend", "time", group_by="respondent_id")])
