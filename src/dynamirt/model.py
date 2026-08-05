@@ -2,7 +2,7 @@ from .mini_gllvm import gllvm
 from .mini_gllvm import Linear
 
 from .mini_gllvm.families import Bernoulli
-from .mini_gllvm.loadings import Unconstrained
+from .mini_gllvm.loadings import Unconstrained, Fixed
 
 from .families import _irt_NPL
 
@@ -11,7 +11,7 @@ from functools import partial
 from typing import Sequence, Callable, Literal
 
 def dynamirt(
-    model_type: Literal["2PL", "3PL", "4PL"]="2PL",
+    model_type: Literal["1PL", "2PL", "3PL", "4PL"]="2PL",
     n_latent: int =1,
     loadings: Callable | None =None,
     latent_fn: Sequence[Callable] | None =None,
@@ -19,8 +19,13 @@ def dynamirt(
     include_residuals: bool | None =None,
     model_type_kwargs: dict | None =None
 ):
+    if model_type == "1PL":
+        if loadings is not None:
+            raise ValueError("1PL fixes the loadings. drop `loadings` or use 2PL.")
+        loadings = Fixed()
     
     loadings = Unconstrained() if loadings is None else loadings
+    
     latent_contribution = [] if latent_fn is None else list(latent_fn)
     DIF = [] if DIF is None else list(DIF)
     model_type_kwargs = {} if model_type_kwargs is None else model_type_kwargs
@@ -37,7 +42,7 @@ def dynamirt(
         
     full_rank = [Linear("item_intercept", predictors="one_"), *DIF]
     
-    if model_type == "2PL":
+    if model_type in ["1PL", "2PL"]:
         family_fn = Bernoulli()
     elif model_type in ["3PL", "4PL"]:
         family_fn = _irt_NPL(model_type, **model_type_kwargs)
