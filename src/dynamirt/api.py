@@ -1,17 +1,19 @@
 from .mini_gllvm import gllvm
 from .mini_gllvm import Linear
 
-from .mini_gllvm.families import Bernoulli
 from .mini_gllvm.loadings import Unconstrained, Fixed
 
-from .families import _irt_NPL
+from .families import _dichotomous, _polytomous
 
 from functools import partial
 
 from typing import Sequence, Callable, Literal
 
+_DICHOTOMOUS = ["1PL", "2PL", "3PL", "4PL"]
+_POLYTOMOUS = ["GRM", "PCM", "GPCM"]
+
 def dynamirt(
-    model_type: Literal["1PL", "2PL", "3PL", "4PL"]="2PL",
+    model_type: Literal["1PL", "2PL", "3PL", "4PL", "GRM", "PCM", "GPCM"]="2PL",
     n_latent: int =1,
     loadings: Callable | None =None,
     latent_fn: Sequence[Callable] | None =None,
@@ -19,6 +21,8 @@ def dynamirt(
     include_residuals: bool | None =None,
     model_type_kwargs: dict | None =None
 ):
+    
+    # ----------------- validation and setting defaults -----------------
     if model_type == "1PL":
         if loadings is not None:
             raise ValueError("1PL fixes the loadings. drop `loadings` or use 2PL.")
@@ -36,21 +40,21 @@ def dynamirt(
 
     if not include_residuals and not latent_contribution:
         raise ValueError("No latent terms: set include_residuals=True or pass latent_fn.")
-        
+
+    # ----------------- model construction -----------------
     if include_residuals:
         latent_contribution.append(Linear("residuals", predictors="one_", group_by="row_"))    
         
-    # generate item intercept dichotomous models
-    full_rank = [Linear("item_intercept", predictors="one_"), *DIF]
-
-    # choose likelihood function based on model_type
-    if model_type in ["1PL", "2PL"]:
-        family_fn = Bernoulli()
-    elif model_type in ["3PL", "4PL"]:
-        family_fn = _irt_NPL(model_type, **model_type_kwargs)
+    if model_type in _DICHOTOMOUS:
+        # generate item intercept for dichotomous models
+        full_rank = [Linear("item_intercept", predictors="one_"), *DIF]
+        family_fn = _dichotomous(model_type, **model_type_kwargs)
+    elif model_type in _POLYTOMOUS:
+        # polytomous models create their own intercepts in their family_fn
+        full_rank = [*DIF]
+        family_fn = _polytomous(model_type, **model_type_kwargs)
     else:
-        raise ValueError(f"Unkown model type {model_type}")
-    
+        raise ValueError(f"Unkown model type {model_type}")    
     
     model = partial(
         gllvm,
