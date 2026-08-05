@@ -1,0 +1,11 @@
+# Python caches
+__pycache__/
+*.py[cod]
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Editor / OS (optional, add if relevant to you)
+.DS_Store
+.vscode/
+.idea/

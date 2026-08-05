@@ -1,0 +1,30 @@
+[build-system]
+build-backend = "hatchling.build"
+requires = ["hatchling"]
+
+[project]
+name = "dynamirt"
+version = "0.0.1"
+authors = [
+  { name="Jonas Kupschus", email="jonas.kupschus@rwth-aachen.de" },
+  { name="Andreas Schuppert", email="aschuppert@ukaachen.de" },
+]
+description = "Static and Longitudinal Multidimensional Item Response Theory."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy",
+    "jax",
+    "numpyro",
+    "arviz",
+    "matplotlib"
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+license = "Apache-2.0"
+license-files = ["LICEN[CS]E*"]
+
+[project.urls]
+Homepage = "https://gitlab.git.nrw/jkupschus/dynamirt"
