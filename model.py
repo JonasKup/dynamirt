@@ -11,15 +11,15 @@ from ._context import _Context
 from .loadings import Unconstrained
     
 def gllvm(
-    responses: None | ArrayLike = None,
-    covariates: Mapping[str, ArrayLike] = {},
+    responses: None | ArrayLike,
+    covariates: Mapping[str, ArrayLike],
     n_latent: int=1,
-    eta_regression: List[Callable]=None,
-    u_regression: List[Callable]=None,
+    full_rank_regression: List[Callable]=None,
+    latent_regression: List[Callable]=None,
     loadings=Unconstrained(),
     family: Callable=Bernoulli(),
-    n_obs=None, # for predictive
-    n_var=None
+    n_obs: int=None, # for predictive
+    n_var: int=None
     ):
     
     """Generalized linear latent variable model.
@@ -44,10 +44,7 @@ def gllvm(
     # n_var: number of variables to simultanously regress on
     if responses is not None:
         n_obs, n_var = responses.shape 
-    
-    n_obs = responses.shape[0]  
-    n_var = responses.shape[1]  
-    
+        
     covariates = {**covariates,
                   "one_": np.array([1.0]),  # for intercepts
                   "row_": np.arange(n_obs)} # stand-in for ID column in scenarios w/o repeated measures where n_obs == n_site/respondent
@@ -56,14 +53,14 @@ def gllvm(
     
     # full-rank regression (DIF under IRT)
     eta = jnp.zeros((n_obs, n_var))
-    if eta_regression is not None:
-        for term in eta_regression:
+    if full_rank_regression is not None:
+        for term in full_rank_regression:
             eta += term(ctx, n_var) # (n_obs, n_var)
     
     # reduced-rank regression
     u = jnp.zeros((n_obs, n_latent))
-    if u_regression is not None:
-        for term in u_regression:
+    if latent_regression is not None:
+        for term in latent_regression:
             u += term(ctx, n_latent) # (n_obs, n_latent)
     
     loadings_matrix = loadings(ctx) # (n_latent, n_var)
