@@ -40,14 +40,17 @@ def dynamirt(
     if include_residuals:
         latent_contribution.append(Linear("residuals", predictors="one_", group_by="row_"))    
         
+    # generate item intercept dichotomous models
     full_rank = [Linear("item_intercept", predictors="one_"), *DIF]
-    
+
+    # choose likelihood function based on model_type
     if model_type in ["1PL", "2PL"]:
         family_fn = Bernoulli()
     elif model_type in ["3PL", "4PL"]:
         family_fn = _irt_NPL(model_type, **model_type_kwargs)
     else:
         raise ValueError(f"Unkown model type {model_type}")
+    
     
     model = partial(
         gllvm,
