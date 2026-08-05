@@ -19,7 +19,8 @@ def gllvm(
     loadings=Unconstrained(),
     family: Callable=Bernoulli(),
     n_obs: int=None, # for predictive
-    n_var: int=None
+    n_var: int=None,
+    latent_site_name: str="u"
     ):
     
     """Generalized linear latent variable model.
@@ -67,7 +68,10 @@ def gllvm(
         
     latent_contributions = u @ loadings_matrix.T # (n_obs, n_var)
     
+    numpyro.deterministic(latent_site_name, u)
+    
     mu = eta + latent_contributions
+    
     
     if responses is None:
         numpyro.sample("Y", family(mu, ctx))
