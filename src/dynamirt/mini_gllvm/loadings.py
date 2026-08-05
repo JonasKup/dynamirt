@@ -9,6 +9,14 @@ from jax.typing import ArrayLike
 
 from ._context import _Context
 
+def Fixed():
+    # disables differential variable discrimination
+    def loadings(ctx: _Context):
+        
+        return jnp.ones((ctx.n_var, ctx.n_latent))
+    
+    return loadings
+
 def Confirmatory(Q: ArrayLike):
     def loadings(ctx: _Context):
         rows, cols = np.nonzero(np.asarray(Q))
