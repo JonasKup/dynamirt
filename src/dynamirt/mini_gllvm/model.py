@@ -73,10 +73,10 @@ def gllvm(
         
     latent_contributions = u @ loadings_matrix.T # (n_obs, n_var)
     
+    mu = eta + latent_contributions
+    
     numpyro.deterministic(latent_site_name, u)
     numpyro.deterministic("loadings", loadings_matrix)
-    
-    mu = eta + latent_contributions
     
     # likelihood based on user supplied family function
     # responses should always be float to carry nan
