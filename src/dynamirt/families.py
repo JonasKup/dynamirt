@@ -44,7 +44,7 @@ def _dichotomous(
     return family
 
 # This might be flipping default sign of the intercept.
-def _polytomous(model_type: Literal["GRM", "GPCM"], n_cat: int, prior: dist.Distribution = None):
+def _polytomous(model_type: Literal["GRM", "GPCM", "PCM"], n_cat: int, prior: dist.Distribution = None):
     
     """"Computes likelihood for polytomous models. Number of categories must be given to dynamirt as model_type_kwargs"""
     
@@ -53,10 +53,10 @@ def _polytomous(model_type: Literal["GRM", "GPCM"], n_cat: int, prior: dist.Dist
     def family(eta: ArrayLike, ctx: _Context):
         base = prior.expand((ctx.n_var, n_cat - 1)).to_event(1)
         if model_type == "GRM":
-            c = numpyro.sample("_cutpoints",
+            c = numpyro.sample("cutpoints",
                                dist.TransformedDistribution(base, OrderedTransform()).to_event(1))
             return dist.OrderedLogistic(eta, c)
-        d = numpyro.sample("_steps", base.to_event(1))
+        d = numpyro.sample("steps", base.to_event(1))
         logits = jnp.cumsum(jnp.pad(eta[..., None] - d, ((0, 0), (0, 0), (1, 0))), axis=-1)
         return dist.CategoricalLogits(logits)
 
