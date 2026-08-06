@@ -74,6 +74,7 @@ def gllvm(
     latent_contributions = u @ loadings_matrix.T # (n_obs, n_var)
     
     numpyro.deterministic(latent_site_name, u)
+    numpyro.deterministic("loadings", loadings_matrix)
     
     mu = eta + latent_contributions
     
