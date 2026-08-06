@@ -90,4 +90,4 @@ def gllvm(
         
         if family_fn.support.is_discrete:
             obs = obs.astype(jnp.result_type(int))
-        numpyro.sample("Y", family(mu, ctx).mask(~mask), obs=obs)
+        numpyro.sample("Y", family_fn.mask(~mask), obs=obs)
