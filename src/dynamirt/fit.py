@@ -37,12 +37,13 @@ def fit_svi(
     guide_kwargs=None,
     optim_kwargs=None,
     run_kwargs=None,
-    rng_key=None
+    rng_key=None,
+    num_samples: int=500
     ):
 
     guide_kwargs = guide_kwargs or {}
     optim_kwargs = optim_kwargs or {"step_size": 1e-4}
-    run_kwargs = run_kwargs or {"num_steps": 5000, "num_samples": 500}
+    run_kwargs = run_kwargs or {"num_steps": 5000}
     rng_key = rng_key if rng_key is not None else jax.random.key(0)
 
     guide = guide_class(model, **guide_kwargs)
@@ -53,7 +54,7 @@ def fit_svi(
     idata = az.from_numpyro_svi(
         svi,
         svi_result=svi_result,
-        num_samples=run_kwargs["num_samples"],
+        num_samples=num_samples,
         model_kwargs={"responses": responses, "covariates": covariates}
         )
     
