@@ -22,10 +22,11 @@ def _dichotomous(
     lower_asymptote_prior = dist.Beta(2, 8) if lower_asymptote_prior is None else lower_asymptote_prior
     upper_asymptote_prior = dist.Beta(8, 2) if upper_asymptote_prior is None else upper_asymptote_prior
 
+    if model_type in ["1PL", "2PL"]:
+        return Bernoulli()
+
     def family(eta: ArrayLike, ctx: _Context):
         
-        if model_type in ["1PL", "2PL"]:
-            return Bernoulli()
 
         la = numpyro.sample("lower_asymptote", lower_asymptote_prior.expand((ctx.n_var,)).to_event(1))
 
