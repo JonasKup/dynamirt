@@ -53,10 +53,10 @@ def _polytomous(model_type: Literal["GRM", "GPCM"], n_cat: int, prior: dist.Dist
     def family(eta: ArrayLike, ctx: _Context):
         base = prior.expand((ctx.n_var, n_cat - 1)).to_event(1)
         if model_type == "GRM":
-            c = numpyro.sample("cutpoints",
+            c = numpyro.sample("_cutpoints",
                                dist.TransformedDistribution(base, OrderedTransform()).to_event(1))
             return dist.OrderedLogistic(eta, c)
-        d = numpyro.sample("steps", base.to_event(1))
+        d = numpyro.sample("_steps", base.to_event(1))
         logits = jnp.cumsum(jnp.pad(eta[..., None] - d, ((0, 0), (0, 0), (1, 0))), axis=-1)
         return dist.CategoricalLogits(logits)
 
