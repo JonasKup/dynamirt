@@ -77,9 +77,17 @@ def gllvm(
     
     mu = eta + latent_contributions
     
+    # likelihood based on user supplied family function
+    # responses should always be float to carry nan
+    # must be manually cast to int if the distribution returned by family_fn only has discrete support (e.g., ordinal models)
+    family_fn = family(mu, ctx)
     
     if responses is None:
-        numpyro.sample("Y", family(mu, ctx))
+        numpyro.sample("Y", family_fn)
     else:
         mask = jnp.isnan(responses)
-        numpyro.sample("Y", family(mu, ctx).mask(~mask), obs=jnp.where(mask, 0.0, responses))
+        obs=jnp.where(mask, 0.0, responses)
+        
+        if family_fn.support.is_discrete:
+            obs = obs.astype(jnp.result_type(int))
+        numpyro.sample("Y", family(mu, ctx).mask(~mask), obs=obs)
