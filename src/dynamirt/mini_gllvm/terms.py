@@ -249,7 +249,7 @@ class HSGP:
     group_by: str | None = None
     varies_over_variables: bool = True
     
-    amplitude_by_group: bool = False # contract these into single one. Either share one or both.
+    amplitude_by_group: bool = False
     amplitude_by_variable: bool = True
     length_by_group: bool = False
     length_by_variable: bool = True
