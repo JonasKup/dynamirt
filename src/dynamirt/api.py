@@ -24,9 +24,9 @@ def dynamirt(
 ):
     
     # ----------------- validation and setting defaults -----------------
-    if model_type == "1PL":
+    if model_type in ["1PL", "PCM"]:
         if loadings is not None:
-            raise ValueError("1PL fixes the loadings. drop `loadings` or use 2PL.")
+            raise ValueError("1PL/PCM fixes the loadings. drop `loadings` or use 2PL/GPCM.")
         loadings = Fixed()
     
     loadings = Unconstrained() if loadings is None else loadings
