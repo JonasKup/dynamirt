@@ -58,6 +58,6 @@ def fit_svi(
         model_kwargs={"responses": responses, "covariates": covariates}
         )
     
-    # add predictive and everything
-
+    # add predictive
+    
     return idata, guide, svi_result
