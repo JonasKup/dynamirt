@@ -45,18 +45,33 @@ def _dichotomous(
     return family
 
 # This might be flipping default sign of the intercept.
-def _polytomous(model_type: Literal["GRM", "GPCM", "PCM"], n_cat: int, prior: dist.Distribution = None):
-    
-    """"Computes likelihood for polytomous models. Number of categories must be given to dynamirt as model_type_kwargs"""
+# prior naming needs to be cleared up.
+# potentially separate GRM and GPCM
+def _polytomous(
+    model_type, 
+    n_cat, 
+    prior=None, 
+    loc_prior=None, 
+    gap_prior=None):
     
     prior = dist.Normal(0, 1) if prior is None else prior
+    loc_prior = dist.Normal(0, 3) if loc_prior is None else loc_prior
+    gap_prior = dist.Normal(0, 0.5) if gap_prior is None else gap_prior
 
-    def family(eta: ArrayLike, ctx: _Context):
-        base = prior.expand((ctx.n_var, n_cat - 1)).to_event(1)
+    def family(eta, ctx):
+        
         if model_type == "GRM":
+            base = dist.Normal(
+                jnp.concatenate([jnp.full((ctx.n_var, 1), loc_prior.loc),
+                                 jnp.full((ctx.n_var, n_cat - 2), gap_prior.loc)], -1),
+                jnp.concatenate([jnp.full((ctx.n_var, 1), loc_prior.scale),
+                                 jnp.full((ctx.n_var, n_cat - 2), gap_prior.scale)], -1),
+            ).to_event(1)
             c = numpyro.sample("cutpoints",
                                dist.TransformedDistribution(base, OrderedTransform()).to_event(1))
             return dist.OrderedLogistic(eta, c)
+        
+        base = prior.expand((ctx.n_var, n_cat - 1)).to_event(1)
         d = numpyro.sample("steps", base.to_event(1))
         logits = jnp.cumsum(jnp.pad(eta[..., None] - d, ((0, 0), (0, 0), (1, 0))), axis=-1)
         return dist.CategoricalLogits(logits)
