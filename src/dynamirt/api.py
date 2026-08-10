@@ -19,7 +19,8 @@ def dynamirt(
     latent_fn: Sequence[Callable] | None =None,
     DIF: Sequence[Callable] | None =None,
     include_residuals: bool | None =None,
-    model_type_kwargs: dict | None =None
+    model_type_kwargs: dict | None =None,
+    corr: bool = True
 ):
     
     # ----------------- validation and setting defaults -----------------
@@ -43,7 +44,8 @@ def dynamirt(
 
     # ----------------- model construction -----------------
     if include_residuals:
-        latent_contribution.append(Linear("residuals", predictors="one_", group_by="row_"))    
+        # estimate correlation between latents by default
+        latent_contribution.append(Linear("residuals", predictors="one_", group_by="row_", corr="variables" if corr else None))    
         
     if model_type in _DICHOTOMOUS:
         # generate item intercept for dichotomous models
