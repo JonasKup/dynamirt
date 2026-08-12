@@ -7,9 +7,25 @@ import numpy as np
 
 import numpyro
 import numpyro.distributions as dist
+from numpyro.contrib.hsgp.laplacian import eigenfunctions
+from numpyro.contrib.hsgp.spectral_densities import diag_spectral_density_matern
 
 import jax.numpy as jnp
 import jax
+
+def _factorize(ctx, key):
+    """interpret covariate as index column for grouping"""
+    if key is None:
+        return np.zeros(ctx.n_obs, int), 1
+    codes, idx = np.unique(np.asarray(ctx.covariates[key]).ravel(), return_inverse=True)
+    return idx, codes.size
+
+def _design(ctx, predictors):
+    """stack multiple covariates into single array if multiple were given. 
+    Broadcast scalar values to correct length."""
+    keys = [predictors] if isinstance(predictors, str) else list(predictors)
+    cols = [np.broadcast_to(np.asarray(ctx.covariates[k]).ravel(), (ctx.n_obs,)) for k in keys]
+    return np.stack(cols, axis=-1)
 
 @dataclass(frozen=True)
 class Linear:
@@ -45,6 +61,7 @@ class Linear:
     # todo: sum to zero
     constraint: Literal[None, "reference_coding"] = None
     
+    #pool
     pool_over_groups: bool = False
     pool_over_variables: bool = False
     varies_over_variables: bool = True
@@ -59,20 +76,10 @@ class Linear:
     def __call__(self, ctx: _Context, n_vars: int):
         # n_vars is either n_var or n_latents depending on whether Linear is called for eta or u regression
 
-        # stack multiple covariates into single array if multiple were given
-        overs = [self.predictors] if isinstance(self.predictors, str) else list(self.predictors)
-        n_predictors = len(overs)
-        X = jnp.stack([ctx.covariates[o] for o in overs], axis=-1)
+        X = _design(ctx, self.predictors)
+        n_predictors = X.shape[1]
 
-        # X = jnp.stack([jnp.broadcast_to(jnp.asarray(ctx.covariates[o], float), (ctx.n_obs,))
-        #                for o in overs], axis=-1)    # (n_obs, n_predictors)
-
-        # factorize group_by index
-        if self.group_by is None:
-            idx, n_groups = np.zeros(ctx.n_obs, int), 1
-        else:
-            codes, idx = np.unique(np.asarray(ctx.covariates[self.group_by]).ravel(), return_inverse=True)
-            n_groups = codes.size 
+        idx, n_groups = _factorize(ctx, self.group_by)
                    
         # parameter per 'stacked glm' or single parameter broadcast over glm stack
         # if not varies_over_variables this is another entry point for latent variables that are not subject to the loadings matrix
@@ -81,12 +88,10 @@ class Linear:
         # sampling one fewer level for reference coding
         n_free = n_groups - 1 if self.constraint == "reference_coding" else n_groups
         shape = (n_free, n_target, n_predictors)
+        
         # hyperparameters are shared (size 1) along any axis we pool over
-        hyper_shape = (1 if self.pool_over_groups else n_free,
-                       1 if self.pool_over_variables else n_target,
-                       n_predictors)
-
-        coef = numpyro.sample(f"{self.name}_raw", self.prior.expand(shape).to_event(3))
+        hyper_shape = (1 if self.pool_over_groups else n_free, 1 if self.pool_over_variables else n_target, n_predictors)
+        coef = numpyro.sample(f"{self.name}_raw", self.prior.expand(hyper_shape).to_event(3))
 
         # b = group_by-level, v = variable/latent, o = over
         if self.corr == "predictors":
@@ -100,9 +105,8 @@ class Linear:
             L = numpyro.sample(f"{self.name}_L", dist.LKJCholesky(m, 1))   # (m, m) lower-triangular
             coef = (coef.reshape(n_free, m) @ L.T).reshape(n_free, n_target, n_predictors)
             
-
         # pooling
-        if hyper_shape != shape:
+        if self.pool_over_groups or self.pool_over_variables:
             loc = numpyro.sample(f"{self.name}_loc", self.loc_prior.expand(hyper_shape).to_event(3))
             scale = numpyro.sample(f"{self.name}_scale", self.scale_prior.expand(hyper_shape).to_event(3))
             coef = loc + scale * coef
@@ -114,21 +118,6 @@ class Linear:
         coef = numpyro.deterministic(self.name, coef) # (n_groups, n_target, n_predictors)
         # n = n_obs, o = over, v = variable/latent
         return jnp.einsum("no,nvo->nv", X, coef[idx]) # (n_obs, n_var)
-
-def _factorize(ctx, key, n_obs):
-    if key is None:
-        return np.zeros(n_obs, int), 1
-    codes, idx = np.unique(np.asarray(ctx.covariates[key]).ravel(), return_inverse=True)
-    return idx, codes.size
-
-# could also be used instead of _GaussMarkov._scale
-def _hyper(name, prior, n_groups, n_target, by_group, by_variable):
-    """Sample a hyperparameter, shared (size 1) along any axis not varied over."""
-    shape = (n_groups if by_group else 1, n_target if by_variable else 1)
-    value = (numpyro.sample(name, prior.expand(shape).to_event(2))
-             if isinstance(prior, dist.Distribution)
-             else jnp.full(shape, prior))
-    return jnp.broadcast_to(value, (n_groups, n_target))
 
 @dataclass(frozen=True)
 class _GaussMarkov:
@@ -145,8 +134,8 @@ class _GaussMarkov:
     scale_prior: dist.Distribution | float = dist.HalfNormal(1)
 
     def _axes(self, ctx, n_vars):
-        group_idx, n_groups = _factorize(ctx, self.group_by, ctx.n_obs)
-        t_idx, n_time = _factorize(ctx, self.order_by, ctx.n_obs)
+        group_idx, n_groups = _factorize(ctx, self.group_by)
+        t_idx, n_time = _factorize(ctx, self.order_by)
         n_target = n_vars if self.varies_over_variables else 1
         return group_idx, n_groups, t_idx, n_time, n_target
 
@@ -163,7 +152,6 @@ class _GaussMarkov:
                               dist.Normal(0, 1)
                               .expand((n_time, n_groups, n_target)).to_event(3))
 
-
 @dataclass(frozen=True)
 class GRW(_GaussMarkov):
     """Gaussian random walk. x_1 = sigma * z_1, x_t = x_{t-1} + sigma * z_t."""
@@ -174,7 +162,6 @@ class GRW(_GaussMarkov):
         z = self._innovations(n_time, n_groups, n_target)
         x = numpyro.deterministic(self.name, jnp.cumsum(scale * z, axis=0))
         return x[t_idx, group_idx]
-
 
 @dataclass(frozen=True)
 class AR1(_GaussMarkov):
@@ -201,10 +188,6 @@ class AR1(_GaussMarkov):
         _, xs = jax.lax.scan(step, x0, eps[1:])
         x = numpyro.deterministic(self.name, jnp.concatenate([x0[None], xs]))
         return x[t_idx, group_idx]
-
-from jax.typing import ArrayLike
-from numpyro.contrib.hsgp.laplacian import eigenfunctions
-from numpyro.contrib.hsgp.spectral_densities import diag_spectral_density_matern
 
 # hsgp adapted from https://num.pyro.ai/en/stable/_modules/numpyro/contrib/hsgp/approximation.html
 # numpyro's hsgp helpers are scalar in alpha/length so manual vmap is required
@@ -243,33 +226,43 @@ class HSGP:
     name: str
     predictors: str | Sequence[str]
     nu: float
-    ell: int
-    m: int
+    ell: float | Sequence[float]
+    m: int | Sequence[int]
     
     group_by: str | None = None
     varies_over_variables: bool = True
     
     amplitude_by_group: bool = False
     amplitude_by_variable: bool = True
-    length_by_group: bool = False
-    length_by_variable: bool = True
+    scale_by_group: bool = False
+    scale_by_variable: bool = True
     
     amplitude_prior: dist.Distribution | float = 1.0
-    length_prior: dist.Distribution | float = dist.InverseGamma(5, 5)
+    scale_prior: dist.Distribution | float = dist.InverseGamma(5, 5)
 
     def __call__(self, ctx: _Context, n_vars: int):
         
-        
-        idx, n_groups = _factorize(ctx, self.group_by, ctx.n_obs)
+        idx, n_groups = _factorize(ctx, self.group_by)
         n_target = n_vars if self.varies_over_variables else 1
 
-        overs = [self.predictors] if isinstance(self.predictors, str) else list(self.predictors)
-        X = jnp.stack([ctx.covariates[o] for o in overs], axis=-1)
+        X = _design(ctx, self.predictors)
         
-        # broadcast alpha and length priors to correct shapes
-        alpha = _hyper(f"{self.name}_amplitude", self.amplitude_prior, n_groups, n_target, self.amplitude_by_group, self.amplitude_by_variable)
-        length = _hyper(f"{self.name}_length", self.length_prior, n_groups, n_target, self.length_by_group, self.length_by_variable)
-                
-        phi, weights = _hsgp_matern(X, self.nu, alpha, length, self.ell, self.m, self.name)
+        alpha_shape = (n_groups if self.amplitude_by_group else 1, n_target if self.amplitude_by_variable else 1)
+        scale_shape = (n_groups if self.scale_by_group else 1, n_target if self.scale_by_variable else 1)
+        
+        if isinstance(self.amplitude_prior, dist.Distribution):
+            alpha = numpyro.sample(f"{self.name}_amplitude", self.amplitude_prior.expand(alpha_shape).to_event(2))
+        else:
+            alpha = jnp.full(alpha_shape, self.amplitude_prior)
+            
+        if isinstance(self.scale_prior, dist.Distribution):
+            scale = numpyro.sample(f"{self.name}_scale", self.scale_prior.expand(scale_shape).to_event(2))
+        else:
+            scale = jnp.full(scale_shape, self.scale_prior)
+            
+        alpha = jnp.broadcast_to(alpha, (n_groups, n_target))
+        scale = jnp.broadcast_to(scale, (n_groups, n_target))
+                            
+        phi, weights = _hsgp_matern(X, self.nu, alpha, scale, self.ell, self.m, self.name)
         f = jnp.einsum("nb,nvb->nv", phi, weights[idx])
         return numpyro.deterministic(self.name, f)
