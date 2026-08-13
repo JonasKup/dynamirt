@@ -8,7 +8,7 @@ import numpy as np
 import numpyro
 import numpyro.distributions as dist
 from numpyro.contrib.hsgp.laplacian import eigenfunctions
-from numpyro.contrib.hsgp.spectral_densities import diag_spectral_density_matern
+from numpyro.contrib.hsgp.spectral_densities import diag_spectral_density_matern, diag_spectral_density_squared_exponential
 
 import jax.numpy as jnp
 import jax
@@ -191,7 +191,7 @@ class AR1(_GaussMarkov):
 
 # hsgp adapted from https://num.pyro.ai/en/stable/_modules/numpyro/contrib/hsgp/approximation.html
 # numpyro's hsgp helpers are scalar in alpha/length so manual vmap is required
-def _hsgp_matern(
+def _hsgp_kernel(
     X: jax.Array,
     nu: float,
     alpha: jax.Array,
@@ -199,6 +199,7 @@ def _hsgp_matern(
     ell: float | Sequence[float],
     m: int | Sequence[int],
     name: str,
+    kernel: Literal["Matern", "ExpSquared"]
 ):
     dim = X.shape[-1]
     n_groups, n_target = alpha.shape
@@ -207,8 +208,11 @@ def _hsgp_matern(
     n_basis = phi.shape[-1]
 
     def _spd(length_k, alpha_k):
-        return jnp.sqrt(diag_spectral_density_matern(
-            nu=nu, alpha=alpha_k, length=length_k, ell=ell, m=m, dim=dim))
+        if kernel == "Matern":
+            return jnp.sqrt(diag_spectral_density_matern(
+                nu=nu, alpha=alpha_k, length=length_k, ell=ell, m=m, dim=dim))
+        return jnp.sqrt(diag_spectral_density_squared_exponential(
+                alpha=alpha_k, length=length_k, ell=ell, m=m, dim=dim))
 
     spd = jax.vmap(_spd)(length.reshape(-1), alpha.reshape(-1)) # (n_groups*n_target, n_basis)
     spd = spd.reshape(n_groups, n_target, n_basis)
@@ -225,6 +229,7 @@ class HSGP:
     
     name: str
     predictors: str | Sequence[str]
+    kernel: Literal["Matern", "ExpSquared"]
     nu: float
     ell: float | Sequence[float]
     m: int | Sequence[int]
@@ -263,6 +268,6 @@ class HSGP:
         alpha = jnp.broadcast_to(alpha, (n_groups, n_target))
         scale = jnp.broadcast_to(scale, (n_groups, n_target))
                             
-        phi, weights = _hsgp_matern(X, self.nu, alpha, scale, self.ell, self.m, self.name)
+        phi, weights = _hsgp_kernel(X, self.nu, alpha, scale, self.ell, self.m, self.name, self.kernel)
         f = jnp.einsum("nb,nvb->nv", phi, weights[idx])
         return numpyro.deterministic(self.name, f)
