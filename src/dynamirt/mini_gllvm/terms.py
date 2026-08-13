@@ -32,7 +32,7 @@ class Linear:
     
     """Linear term `X @ coef` for a gllvm regression.
 
-    Contributes (n_obs, n_target) where n_target is n_var (eta) or n_latent (u),
+    Contributes (n_obs, n_target) where n_target is number of variables (full rank), number of latents (reduced rank),
     or 1 broadcast over the stack if `varies_over_variables` is False.
 
     Attributes:
