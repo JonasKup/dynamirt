@@ -19,9 +19,34 @@ def dynamirt(
     latent_fn: Sequence[Callable] | None =None,
     DIF: Sequence[Callable] | None =None,
     include_residuals: bool | None =None,
-    model_type_kwargs: dict | None =None,
-    corr: bool = True
-):
+    corr: bool = True,
+    model_type_kwargs: dict | None =None
+    ) -> Callable:
+    
+    """
+    Build a MIRT model with optionally time evolving latent traits.
+
+    Args:
+        model_type: IRT family to use. Dichotomous: "1PL"/"2PL"/"3PL"/"4PL".
+            Polytomous: "GRM"/"PCM"/"GPCM".
+        n_latent: Dimensionality of the latent space.
+        loadings: Loading matrix factory (e.g. `Fixed()`, `Unconstrained()`).
+            Defaults to `Unconstrained()`, except for "1PL"/"PCM" where it's
+            forced to `Fixed()`.
+        latent_fn: Latent regression terms (e.g. covariate effects on theta).
+            If omitted, a i.i.d residual latent term is added by default (see `include_residuals`).
+        DIF: Terms added to the full-rank (item-level) regression to model
+            differential item functioning.
+        include_residuals: Whether to add a residual latent term. Defaults
+            to True only when `latent_fn` is not provided.
+        corr: If including residuals, whether to estimate correlations
+            between latent variables' residuals.
+        model_type_kwargs: Extra keyword arguments passed to the family
+            constructor for `model_type`.
+
+    Returns:
+        Callable: A numpyro model function.
+    """
     
     # ----------------- validation and setting defaults -----------------
     if model_type in ["1PL", "PCM"]:
