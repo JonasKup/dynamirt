@@ -7,7 +7,7 @@ import jax.numpy as jnp
 from jax.typing import ArrayLike
 
 from ._context import _Context
-from .loadings import Unconstrained
+from .loadings import Full
     
 def gllvm(
     responses: None | ArrayLike,
@@ -44,7 +44,7 @@ def gllvm(
         raise ValueError("n_obs and n_var must be specified explicitly if no responses are given.")
     
     # loadings default to unconstrained
-    loadings = Unconstrained() if loadings is None else loadings
+    loadings = Full() if loadings is None else loadings
 
     # n_obs: total number of obs. Doesn't necessarily need to be number of sites/respondents in repeated measurement scenarios
     # n_var: number of variables to simultanously regress on
