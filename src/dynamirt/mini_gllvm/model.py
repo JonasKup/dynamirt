@@ -69,7 +69,8 @@ def gllvm(
         for term in latent_regression:
             u += term(ctx, n_latent) # (n_obs, n_latent)
     
-    loadings_matrix = loadings(ctx) # (n_var, n_latent)
+    with numpyro.handlers.scope(prefix="loadings", divider="."):
+        loadings_matrix = loadings(ctx) # (n_var, n_latent)
         
     latent_contributions = u @ loadings_matrix.T # (n_obs, n_var)
     
