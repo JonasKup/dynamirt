@@ -1,5 +1,10 @@
 # dynamirt
 
+![Item Response Pattern](imgs/simulated_item_responses.svg)
+
+![Posterior Recovery](imgs/recovered_trajectories.svg)
+
+
 ## Quickstart
 
 Fit a multidimensional longitudinal 2-PL IRT model with three latent trajectories and IID Matérn-Kernel HSGP priors on the trajectories.
