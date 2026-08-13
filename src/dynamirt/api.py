@@ -1,7 +1,7 @@
 from .mini_gllvm import gllvm
 from .mini_gllvm import Linear
 
-from .mini_gllvm.loadings import Unconstrained, Fixed
+from .mini_gllvm.loadings import Full, Fixed
 
 from .families import _dichotomous, _polytomous
 
@@ -54,7 +54,7 @@ def dynamirt(
             raise ValueError("1PL/PCM fixes the loadings. drop `loadings` or use 2PL/GPCM.")
         loadings = Fixed()
     
-    loadings = Unconstrained() if loadings is None else loadings
+    loadings = Full() if loadings is None else loadings
     
     latent_contribution = [] if latent_fn is None else list(latent_fn)
     DIF = [] if DIF is None else list(DIF)
