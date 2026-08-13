@@ -4,6 +4,7 @@
 
 ![Posterior Recovery](imgs/recovered_trajectories.svg)
 
+<img src="imgs/simulated_item_responses.svg" width="250" alt="Item Response Pattern">
 
 ## Quickstart
 
