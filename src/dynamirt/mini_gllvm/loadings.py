@@ -10,7 +10,12 @@ from jax.typing import ArrayLike
 from ._context import _Context
 
 def Fixed():
-    # disables differential variable discrimination
+    """
+    Loading matrix factory that fixes all loadings to 1 so every item loads equally on every latent factor.
+    
+    Returns:
+        Callable: A `loadings(ctx)` function that returns a (n_var, n_latent) array of ones.
+    """
     def loadings(ctx: _Context):
         
         return jnp.ones((ctx.n_var, ctx.n_latent))
@@ -23,6 +28,25 @@ def Confirmatory(
     free_prior: dist.Distribution | None = None,
     positive_prior: dist.Distribution | None = None
     ):
+    """
+    Loading matrix factory for confirmatory factor analysis.
+
+    Args:
+        Q (ArrayLike): Binary (n_var, n_latent) array. Q[i, j] = 1 means item i is
+            allowed to load on factor j; 0 means the loading is fixed at 0.
+        positive_anchors (ArrayLike, optional): Optional binary array of the same shape as Q.
+            Marks a subset of Q's nonzero entries as positive-only anchor loadings.
+            If None, all free loadings are unconstrained in sign.
+            Defaults to None.
+        free_prior (dist.Distribution | None, optional): Prior distribution for the unconstrained loadings.
+            Defaults to Normal(0, 1) if None.
+        positive_prior (dist.Distribution | None, optional): Prior distribution for the positive anchor loadings.
+            Defaults to LogNormal(0, 0.5) if None.
+
+    Returns:
+        Callable: A `loadings(ctx)` function that returns the (n_var, n_latent)
+        loading matrix
+    """
     
     free_prior = dist.Normal(0, 1) if free_prior is None else free_prior
     positive_prior = dist.LogNormal(0, 0.5) if positive_prior is None else positive_prior
@@ -48,7 +72,20 @@ def Confirmatory(
 
     return loadings
 
-def Unconstrained(prior: dist.Distribution | None = None):
+def Full(prior: dist.Distribution | None = None):
+    """
+    Loading matrix factory with all loadings drawn from `prior`. 
+    For the default Normal(0, 1) this results in an unconstrained loading matrix and is
+    equivalent to `Confirmatory` with Q of all ones and no positive anchors and will lead to
+    rotational and signed-permutation invariances in most cases.
+
+    Args:
+        prior: Prior distribution for each loading. Defaults to Normal(0, 1).
+
+    Returns:
+        A `loadings(ctx)` function that returns a (n_var, n_latent) array
+        sampled entrywise from `prior`.
+    """
     prior = dist.Normal(0, 1) if prior is None else prior
     def loadings(ctx: _Context):
         return numpyro.sample(
@@ -64,15 +101,20 @@ def _half_cauchy_reparam(name, scale, shape=(), event_dim=0):
     return jnp.sqrt(x_sq)
 
 def Sparsity(tau0=1.0, slab_scale: float=1.0, slab_df: float=4.0):
-    """regularized horseshoe sparsity prior on loadings matrix.
+    """
+    Loading matrix factory with regularized horseshoe sparsity prior.
 
     Juho Piironen. Aki Vehtari (2017). Electron. J. Statist. 11 (2) 5018 - 5051
     https://doi.org/10.1214/17-EJS1337SI 
     
     Args:
-        tau0: Global shrinkage scale. p0 / (D - p0) * sigma / sqrt(n). see eq. 3.12.
-        slab_scale: Typical magnitude of a loading that escapes shrinkage.
-        slab_df: Degrees of freedom of the Student-t slab.
+        tau0 (float): Global shrinkage scale. p0 / (D - p0) * sigma / sqrt(n). see eq. 3.12. Defaults to 1.0.
+        slab_scale (float): Typical magnitude of a loading that escapes shrinkage. Defaults to 1.0.
+        slab_df (float): Degrees of freedom of the Student-t slab. Defaults to 4.0.
+        
+    Returns:
+        Callable: A `loadings(ctx)` function that returns the (n_var, n_latent)
+        loading matrix
     """
     def loadings(ctx: _Context):
         shape = (ctx.n_var, ctx.n_latent)
