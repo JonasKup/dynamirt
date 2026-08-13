@@ -25,8 +25,7 @@ class Param:
         full = (n_groups, n_target) + tail
         if not isinstance(self.prior, dist.Distribution):
             return jnp.broadcast_to(jnp.asarray(self.prior), full)
-        shape = (n_groups if self.by_group else 1,
-                 n_target if self.by_variable else 1) + tail
+        shape = (n_groups if self.by_group else 1, n_target if self.by_variable else 1) + tail
         v = numpyro.sample(name, self.prior.expand(shape).to_event(len(shape)))
         return jnp.broadcast_to(v, full)
 
@@ -63,7 +62,7 @@ class ExactGP:
         group_idx, n_groups = _factorize(ctx, self.group_by)
         n_target = n_vars if self.varies_over_variables else 1
 
-        X = np.asarray(_design(ctx, self.predictors))
+        X = _design(ctx, self.predictors)
         padded, valid, slot = _pad_by_group(X, group_idx, n_groups)
         T, dim = padded.shape[0], padded.shape[-1]
 
