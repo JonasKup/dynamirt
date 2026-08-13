@@ -1,45 +1,14 @@
 # dynamirt
 
+Whenever we measure sets of items for multiple respondents, a common assumption is that the measured items arise from a limited number of latent traits. When we measure the same set of items for the same respondent repeatedly (panel studies) the response data often arise in a ragged, inhomogenous fashion, meaning respondents don't share the same number of time points and are sampled continuously rather than at fixed intervals. This is the case, for example, in ecological momentary assessment studies like e-diaries or diagnosis codes in electronic health records. For these cases, the dynamirt package helps to recover continuous latent trajectories under the longitudinal item response theory framework using exact and Hilbert space approximate Gaussian processes.
+
 ![Item Response Pattern](imgs/simulated_item_responses.svg)
 
 ![Posterior Recovery](imgs/recovered_trajectories.svg)
 
-<img src="imgs/simulated_item_responses.svg" width="250" alt="Item Response Pattern">
+<img src="imgs/simulated_item_responses.svg" width="500" alt="Item Response Pattern">
 
-## Quickstart
-
-Fit a multidimensional longitudinal 2-PL IRT model with three latent trajectories and IID Matérn-Kernel HSGP priors on the trajectories.
-
-```
-from dynamirt.models import dynamirt
-from dynamirt.fit import fit_mcmc
-from dynamirt.dynamics import HSGP
+<img src="imgs/recovered_trajectories.svg" width="500" alt="Posterior Recovery">
 
 
-model_hsgp = dynamirt(
-    ir_model="2PL",
-    model_type="confirmatory",
-    n_latents=3,
-    latent_dynamics_fn=HSGP,
-    latent_dynamics_kwargs={ 
-        "nu": 5/2,
-        "ell": 1.5 * n_time,
-        "m": n_time,
-    }
-)
-
-idata, mcmc = fit_mcmc(
-    model_hsgp, 
-    response_data,
-    anchors,
-    seed=0)
-
-```
-
-Plot response data next to estimated latents for person 0:
-
-```
-from dynamirt.eval import plot_summary_by_latent
-
-plot_summary_by_latent(idata, 0)
-```
+Links to docs etc
