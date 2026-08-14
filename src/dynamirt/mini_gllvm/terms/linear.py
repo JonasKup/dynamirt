@@ -3,14 +3,11 @@ from typing import Literal, Sequence
 
 from .._context import _Context
 from ..parameters import Param
-#from ..terms import _factorize, _design
 
 import numpyro
 import numpyro.distributions as dist
 
 import jax.numpy as jnp
-import jax
-
 
 @dataclass(frozen=True)
 class Linear:
@@ -45,7 +42,6 @@ class Linear:
     
     # todo: sum to zero
     constraint: Literal[None, "reference_coding"] = None
-    varies_over_variables: bool = True # I don't think I need this here
 
     corr: Literal[None, "predictors", "variables", "both"] = None
     coef: Param = Param(dist.Normal(0.0, 1.0))
@@ -59,13 +55,13 @@ class Linear:
         idx, n_groups = ctx._factorize(self.group_by)
                    
         # parameter per 'stacked glm' or single parameter broadcast over glm stack
-        # if not varies_over_variables this is another entry point for latent variables that are not subject to the loadings matrix
-        n_target = n_vars if self.varies_over_variables else 1
+        # if not by_variable is "shared" this is another entry point for latent variables that are not subject to the loadings matrix
+        n_target = 1 if self.coef.by_variable == "shared" else n_vars
 
         # sampling one fewer level for reference coding
         n_free = n_groups - 1 if self.constraint == "reference_coding" else n_groups
         
-        # need to sample the raw parameter, then correlate, then apply partial pooling
+        # sample the raw parameter, then correlate, then apply partial pooling
         coef = self.coef.sample_raw(f"{self.name}_raw", n_free, n_target, (n_predictors,))
 
         # b = group_by-level, v = variable/latent, o = over
