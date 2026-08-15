@@ -38,7 +38,7 @@ class Param:
         
         return random
     
-    def apply_partial_pooling(self, name, raw, n_groups, n_target):
+    def apply_partial_pooling(self, name, raw, n_groups, n_target, trailing=()):
                 
         if not isinstance(self.by_group, Pool) and not isinstance(self.by_variable, Pool):
             return raw
@@ -48,15 +48,15 @@ class Param:
         
         # either by_group or by_variable are set to pooling at this point
         pool = self.by_group if isinstance(self.by_group, Pool) else self.by_variable
-        loc = pool.loc(f"{name}_loc", n_groups, n_target)
-        scale = pool.scale(f"{name}_scale", n_groups, n_target)
+        loc = pool.loc(f"{name}_loc", n_groups, n_target, trailing)
+        scale = pool.scale(f"{name}_scale", n_groups, n_target, trailing)
         unconstrained = loc + scale * raw
         return  pool.transform(unconstrained)
     
     def __call__(self, name, n_groups, n_target, trailing=()):
         
-        raw = self.sample_raw(name, n_groups, n_target)
-        coef = self.apply_partial_pooling(name, raw, n_groups, n_target)
+        raw = self.sample_raw(name, n_groups, n_target, trailing)
+        coef = self.apply_partial_pooling(name, raw, n_groups, n_target, trailing)
         return jnp.broadcast_to(coef, (n_groups, n_target, *trailing))
 
 @dataclass(frozen=True)
