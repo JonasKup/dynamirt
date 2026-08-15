@@ -15,6 +15,8 @@ import numpy as np
 from .._context import _Context
 from ..parameters import Param
 
+# To do: Predictive
+
 #------------------------------------------ Exact GPs
 
 def _pad_by_group(X, idx, n_groups):
@@ -82,56 +84,32 @@ class ExactGP:
         return f[slot, group_idx]                     # (n_obs, n_target)
         
 #------------------------------ HSGPs
-
 # hsgp adapted from https://num.pyro.ai/en/stable/_modules/numpyro/contrib/hsgp/approximation.html
-# numpyro's hsgp helpers are scalar in alpha/length so manual vmap is required
-def _hsgp_kernel(
-    X: jax.Array,
-    nu: float,
-    alpha: jax.Array,
-    length: jax.Array,
-    ell: float | Sequence[float],
-    m: int | Sequence[int],
-    name: str,
-    kernel: Literal["Matern", "ExpSquared"]
-):
-    dim = X.shape[-1]
-    n_groups, n_target = alpha.shape
-
-    phi = eigenfunctions(x=X, ell=ell, m=m) # (n_obs, n_basis)
-    n_basis = phi.shape[-1]
-
-    def _spd(length_k, alpha_k):
-        if kernel == "Matern":
-            return jnp.sqrt(diag_spectral_density_matern(
-                nu=nu, alpha=alpha_k, length=length_k, ell=ell, m=m, dim=dim))
-        return jnp.sqrt(diag_spectral_density_squared_exponential(
-                alpha=alpha_k, length=length_k, ell=ell, m=m, dim=dim))
-
-    spd = jax.vmap(_spd)(length.reshape(-1), alpha.reshape(-1)) # (n_groups*n_target, n_basis)
-    spd = spd.reshape(n_groups, n_target, n_basis)
-
-    beta = numpyro.sample(f"{name}_beta",
-                          dist.Normal(0, 1)
-                          .expand((n_groups, n_target, n_basis)).to_event(3))
-
-    return phi, spd * beta # (n_obs, n_basis), (n_groups, n_target, n_basis)
-
-
 @dataclass(frozen=True)
 class HSGP:
     name: str
     predictors: str | Sequence[str]
     kernel: Literal["Matern", "ExpSquared"]
-    nu: float
     ell: float | Sequence[float]
     m: int | Sequence[int]
+    nu: float = 1.5
+
 
     group_by: str | None = None
     varies_over_variables: bool = True
 
     amplitude: Param = Param(1.0)
     length: Param = Param(dist.InverseGamma(5, 5), by_variable="free")
+    
+    def _sqrt_spectral_density(self, alpha, length, dim):
+        # numpyro's hsgp helpers are scalar in alpha/length so manual vmap is required
+        def _spd(alpha_k, length_k):
+            if self.kernel == "Matern":
+                return diag_spectral_density_matern(nu=self.nu, alpha=alpha_k, length=length_k, ell=self.ell, m=self.m, dim=dim)
+            return diag_spectral_density_squared_exponential(alpha=alpha_k, length=length_k, ell=self.ell, m=self.m, dim=dim)
+
+        spd = jax.vmap(_spd)(alpha.reshape(-1), length.reshape(-1))
+        return jnp.sqrt(spd).reshape(*alpha.shape, -1)
 
     def __call__(self, ctx: _Context, n_vars: int):
         idx, n_groups = ctx._factorize(self.group_by)
@@ -140,8 +118,11 @@ class HSGP:
 
         alpha = self.amplitude(f"{self.name}_amplitude", n_groups, n_target)
         length = self.length(f"{self.name}_length", n_groups, n_target)
+        
+        phi = eigenfunctions(x=X, ell=self.ell, m=self.m) # (n_obs, n_basis)
+        spd = self._sqrt_spectral_density(alpha, length, X.shape[-1])  # (n_groups, n_target, n_basis)
+        beta = numpyro.sample(f"{self.name}_beta", dist.Normal(0, 1).expand((n_groups, n_target, phi.shape[-1])).to_event(3))
 
-        phi, weights = _hsgp_kernel(X, self.nu, alpha, length, self.ell, self.m,
-                                    self.name, self.kernel)
+        weights = spd * beta
         f = jnp.einsum("nb,nvb->nv", phi, weights[idx])
         return numpyro.deterministic(self.name, f)
