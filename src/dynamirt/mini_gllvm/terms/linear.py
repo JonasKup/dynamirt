@@ -9,6 +9,10 @@ import numpyro.distributions as dist
 
 import jax.numpy as jnp
 
+# To do: add Custom term?
+# Update Linear docstring
+# remove corr = both path
+
 @dataclass(frozen=True)
 class Linear:
     
@@ -44,10 +48,14 @@ class Linear:
     constraint: Literal[None, "reference_coding"] = None
 
     corr: Literal[None, "predictors", "variables", "both"] = None
-    coef: Param = Param(dist.Normal(0.0, 1.0))
+    coef: Param = Param(dist.Normal(0.0, 1.0), by_group="free", by_variable="free")
 
     def __call__(self, ctx: _Context, n_vars: int):
         # n_vars is either n_var or n_latents depending on whether Linear is called for eta or u regression
+
+        # raise when group_by would become no-op
+        if self.group_by is not None and self.coef.by_group == "shared":
+            raise ValueError("group_by is set but coef is shared across groups")
 
         X = ctx._design(self.predictors)
         n_predictors = X.shape[1]
