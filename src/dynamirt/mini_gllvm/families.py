@@ -13,12 +13,12 @@ def Bernoulli():
 
 def Gaussian(sigma_prior=dist.HalfNormal(1)):
     def family(eta: ArrayLike, ctx: _Context):
-        sigma = numpyro.sample("sigma", sigma_prior.expand((1, ctx.n_var)))
+        sigma = numpyro.sample("sigma", sigma_prior.expand((1, ctx.n_var)).to_event(2))
         return dist.Normal(eta, sigma)
     return family
 
 def NegBinom(conc_prior=dist.HalfNormal(1)):
     def family(eta: ArrayLike, ctx: _Context):
-        conc = numpyro.sample("concentration", conc_prior.expand((1, ctx.n_var)))
+        conc = numpyro.sample("concentration", conc_prior.expand((1, ctx.n_var)).to_event(2))
         return dist.NegativeBinomial2(jnp.exp(eta), conc)
     return family
