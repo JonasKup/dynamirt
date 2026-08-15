@@ -4,7 +4,7 @@ import pytest
 import numpyro
 import numpyro.distributions as dist
 
-from dynamirt.mini_gllvm.parameters import Param
+from dynamirt.gllvm.parameters import Param
 
 @pytest.mark.parametrize("by_group, n_g", [("shared", 1), ("free", 3)])
 @pytest.mark.parametrize("by_variable, n_v", [("shared", 1), ("free", 4)])

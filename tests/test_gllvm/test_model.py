@@ -38,12 +38,12 @@ from numpyro.optim import Adam
 from tinygp import kernels
 
 # adjust to your layout
-from dynamirt.mini_gllvm import gllvm
-from dynamirt.mini_gllvm.families import Gaussian
-from dynamirt.mini_gllvm.parameters import Param
-from dynamirt.mini_gllvm.terms.linear import Linear
-from dynamirt.mini_gllvm.terms.discrete import AR1, GRW
-from dynamirt.mini_gllvm.terms.continuous import HSGP, ExactGP
+from dynamirt.gllvm import gllvm
+from dynamirt.gllvm.families import Gaussian
+from dynamirt.gllvm.parameters import Param
+from dynamirt.gllvm.terms.linear import Linear
+from dynamirt.gllvm.terms.discrete import AR1, GRW
+from dynamirt.gllvm.terms.continuous import HSGP, ExactGP
 
 
 N_TIME = 100

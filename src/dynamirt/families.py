@@ -1,5 +1,5 @@
-from .mini_gllvm._context import _Context
-from .mini_gllvm.families import Bernoulli
+from .gllvm._context import _Context
+from .gllvm.families import Bernoulli
 
 import jax
 import jax.numpy as jnp

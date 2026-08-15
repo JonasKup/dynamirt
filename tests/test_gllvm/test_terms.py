@@ -9,11 +9,11 @@ from tinygp import kernels
 import numpyro
 import numpyro.distributions as dist
 
-from dynamirt.mini_gllvm._context import _Context
-from dynamirt.mini_gllvm.terms.linear import Linear
-from dynamirt.mini_gllvm.terms.discrete import AR1, GRW
-from dynamirt.mini_gllvm.terms.continuous import HSGP, ExactGP
-from dynamirt.mini_gllvm.parameters import Param
+from dynamirt.gllvm._context import _Context
+from dynamirt.gllvm.terms.linear import Linear
+from dynamirt.gllvm.terms.discrete import AR1, GRW
+from dynamirt.gllvm.terms.continuous import HSGP, ExactGP
+from dynamirt.gllvm.parameters import Param
 
 @pytest.fixture
 def ctx():

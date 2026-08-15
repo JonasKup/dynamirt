@@ -1,7 +1,7 @@
-from .mini_gllvm import gllvm
-from .mini_gllvm import Linear
+from .gllvm import gllvm
+from .gllvm import Linear
 
-from .mini_gllvm.loadings import Full, Fixed
+from .gllvm.loadings import Full, Fixed
 
 from .families import _dichotomous, _polytomous
 
