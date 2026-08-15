@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from typing import Literal
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import numpyro
 import numpyro.distributions as dist
@@ -63,4 +63,4 @@ class Param:
 class Pool:
     loc: Param = Param(dist.Normal(0.0, 1.0))
     scale: Param = Param(dist.HalfNormal(0.5))
-    transform: dist.transforms.Transform = dist.transforms.IdentityTransform()
+    transform: dist.transforms.Transform = field(default_factory=dist.transforms.IdentityTransform)
