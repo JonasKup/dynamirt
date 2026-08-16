@@ -7,7 +7,7 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
-   dynamirt.mini_gllvm
+   dynamirt.gllvm
 
 Submodules
 ----------
@@ -16,14 +16,6 @@ dynamirt.api module
 -------------------
 
 .. automodule:: dynamirt.api
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
-dynamirt.families module
-------------------------
-
-.. automodule:: dynamirt.families
    :members:
    :show-inheritance:
    :undoc-members:
