@@ -1,20 +1,20 @@
+from typing import Callable
+
 import numpy as np
 
 import numpyro
 import numpyro.distributions as dist
-
 import jax.numpy as jnp
-
 from jax.typing import ArrayLike
 
 from ._context import _Context
 
-def Fixed():
+def Fixed() -> Callable:
     """
     Loading matrix factory that fixes all loadings to 1 so every item loads equally on every latent factor.
     
     Returns:
-        Callable: A `loadings(ctx)` function that returns a (n_var, n_latent) array of ones.
+        A `loadings(ctx)` function that returns a (n_var, n_latent) array of ones.
     """
     def loadings(ctx: _Context):
         
@@ -27,24 +27,24 @@ def Confirmatory(
     positive_anchors: ArrayLike = None, 
     free_prior: dist.Distribution | None = None,
     positive_prior: dist.Distribution | None = None
-    ):
+    ) -> Callable:
     """
     Loading matrix factory for confirmatory factor analysis.
 
     Args:
-        Q (ArrayLike): Binary (n_var, n_latent) array. Q[i, j] = 1 means item i is
+        Q: Binary (n_var, n_latent) array. Q[i, j] = 1 means item i is
             allowed to load on factor j; 0 means the loading is fixed at 0.
-        positive_anchors (ArrayLike, optional): Optional binary array of the same shape as Q.
+        positive_anchors: Optional binary array of the same shape as Q.
             Marks a subset of Q's nonzero entries as positive-only anchor loadings.
             If None, all free loadings are unconstrained in sign.
             Defaults to None.
-        free_prior (dist.Distribution | None, optional): Prior distribution for the unconstrained loadings.
+        free_prior: Prior distribution for the unconstrained loadings.
             Defaults to Normal(0, 1) if None.
-        positive_prior (dist.Distribution | None, optional): Prior distribution for the positive anchor loadings.
+        positive_prior: Prior distribution for the positive anchor loadings.
             Defaults to LogNormal(0, 0.5) if None.
 
     Returns:
-        Callable: A `loadings(ctx)` function that returns the (n_var, n_latent)
+        A `loadings(ctx)` function that returns the (n_var, n_latent)
         loading matrix
     """
     
@@ -61,18 +61,18 @@ def Confirmatory(
         discrimination = jnp.zeros((ctx.n_var, ctx.n_latent))
 
         if n_free:
-            l = numpyro.sample("loadings_confirmatory_free", free_prior.expand((n_free,)).to_event(1))
+            l = numpyro.sample("confirmatory_free", free_prior.expand((n_free,)).to_event(1))
             discrimination = discrimination.at[rows[free], cols[free]].set(l)
 
         if n_pos:
-            lp = numpyro.sample("loadings_confirmatory_positive", positive_prior.expand((n_pos,)).to_event(1))
+            lp = numpyro.sample("confirmatory_positive", positive_prior.expand((n_pos,)).to_event(1))
             discrimination = discrimination.at[rows[pos], cols[pos]].set(lp)
 
         return discrimination
 
     return loadings
 
-def Full(prior: dist.Distribution | None = None):
+def Full(prior: dist.Distribution | None = None) -> Callable:
     """
     Loading matrix factory with all loadings drawn from `prior`. 
     For the default Normal(0, 1) this results in an unconstrained loading matrix and is
@@ -89,7 +89,7 @@ def Full(prior: dist.Distribution | None = None):
     prior = dist.Normal(0, 1) if prior is None else prior
     def loadings(ctx: _Context):
         return numpyro.sample(
-            "loadings_unconstrained", prior.expand((ctx.n_var, ctx.n_latent)).to_event(2)
+            "full", prior.expand((ctx.n_var, ctx.n_latent)).to_event(2)
         )
         
     return loadings
@@ -100,20 +100,32 @@ def _half_cauchy_reparam(name, scale, shape=(), event_dim=0):
     x_sq = numpyro.sample(name, dist.InverseGamma(0.5, 1.0 / aux).to_event(event_dim))
     return jnp.sqrt(x_sq)
 
-def Sparsity(tau0=1.0, slab_scale: float=1.0, slab_df: float=4.0):
+def Sparsity(tau0=1.0, slab_scale: float=1.0, slab_df: float=4.0) -> Callable:
     """
     Loading matrix factory with regularized horseshoe sparsity prior.
+    
+    Applies the regularised horseshoe prior of Piironen & Vehtari (2017)
+    to the loading matrix, encouraging most loadings toward zero while
+    allowing a sparse subset to remain large.
 
-    Juho Piironen. Aki Vehtari (2017). Electron. J. Statist. 11 (2) 5018 - 5051
-    https://doi.org/10.1214/17-EJS1337SI 
+    Reference:
+        Juho Piironen. Aki Vehtari (2017). Electron. J. Statist. 11 (2) 5018 - 5051
+        https://doi.org/10.1214/17-EJS1337SI 
     
     Args:
-        tau0 (float): Global shrinkage scale. p0 / (D - p0) * sigma / sqrt(n). see eq. 3.12. Defaults to 1.0.
-        slab_scale (float): Typical magnitude of a loading that escapes shrinkage. Defaults to 1.0.
-        slab_df (float): Degrees of freedom of the Student-t slab. Defaults to 4.0.
-        
+        tau0: Global shrinkage scale. A sensible default follows
+            Eq. 3.12: ``p0 / (D - p0) * sigma / sqrt(n)`` where p0 is
+            the expected number of non-zero loadings and D is the total
+            number of loadings. Defaults to 1.0.
+        slab_scale: Typical magnitude of a loading that escapes
+            shrinkage. Controls the width of the regularising slab.
+            Defaults to 1.0.
+        slab_df: Degrees of freedom of the Student-t slab controlling
+            how heavy-tailed the non-zero loadings may be. Defaults
+            to 4.0.
+            
     Returns:
-        Callable: A `loadings(ctx)` function that returns the (n_var, n_latent)
+        A `loadings(ctx)` function that returns the (n_var, n_latent)
         loading matrix
     """
     def loadings(ctx: _Context):

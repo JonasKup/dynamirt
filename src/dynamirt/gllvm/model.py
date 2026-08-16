@@ -17,7 +17,7 @@ def gllvm(
     full_rank_regression: List[Callable]=None,
     latent_regression: List[Callable]=None,
     loadings: Callable | None =None,
-    n_obs: int=None, # for predictive
+    n_obs: int=None,
     n_var: int=None,
     latent_site_name: str="u"
     ):
@@ -25,21 +25,41 @@ def gllvm(
     """Generalized linear latent variable model.
 
     Regresses `n_var` responses jointly on a full-rank linear predictor plus a
-    reduced-rank (`n_latent`) term, `mu = eta + u @ loadings`. NaNs in
-    `responses` are masked out of the likelihood.
-
+    reduced-rank (`n_latent`) term:
+    
+    mu = eta + u @ loadings.T
+    
+    where eta is the sum of full-rank regression terms, u collects
+    the latent scores, and loadings is a (n_var, n_latent) matrix.
+    NaN entries in `responses` are masked out of the likelihood.
+    
     Args:
-        responses: (n_obs, n_var) observations; NaN marks missing.
-        covariates: name -> array of length n_obs (or broadcastable). Keys
-            "one_" (ones, for intercepts) and "row_" (row index) are added
-            automatically.
-        n_latent: dimensionality of the latent space.
-        full_rank_regression: terms called as `term(ctx, n_var) -> (n_obs, n_var)`,
-            summed into the full-rank predictor.
-        latent_regression: terms called as `term(ctx, n_latent) -> (n_obs, n_latent)`,
-            summed into the latent scores.
-        family: called as `family(mu, ctx) -> dist.Distribution` over responses.
+        responses: Observation matrix of shape (n_obs, n_var). NaN marks
+            missing data. Pass None for prior-predictive sampling, in
+            which case n_obs and n_var must be given explicitly.
+        covariates: Mapping from covariate name to array of length n_obs
+            (or broadcastable scalar). Two keys are added automatically:
+            ``"one_"`` (constant 1, for intercepts) and ``"row_"``
+            (observation index, a stand-in for a respondent ID when
+            n_obs equals the number of respondents).
+        family: Called as ``family(mu, ctx)`` and must return a
+            ``numpyro.distributions.Distribution`` over responses.
+        n_latent: Dimensionality of the latent space. Defaults to 1.
+        full_rank_regression: List of term callables, each with signature
+            ``term(ctx, n_var) -> (n_obs, n_var)``. Their outputs are
+            summed into the full-rank predictor eta.
+        latent_regression: List of term callables, each with signature
+            ``term(ctx, n_latent) -> (n_obs, n_latent)``. Their outputs
+            are summed into the latent scores u.
+        loadings: A loading-matrix factory ``loadings(ctx) ->
+            (n_var, n_latent)``. Defaults to ``Full()`` (unconstrained).
+        n_obs: Number of observations. Required when responses is None.
+        n_var: Number of response variables. Required when responses is
+            None.
+        latent_site_name: Name of the NumPyro deterministic site that
+            stores the latent scores u. Defaults to ``"u"``.
     """
+    
     if responses is None and (n_obs is None or n_var is None):
         raise ValueError("n_obs and n_var must be specified explicitly if no responses are given.")
     

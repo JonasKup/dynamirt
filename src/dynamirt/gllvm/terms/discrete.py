@@ -11,10 +11,22 @@ import jax
 
 @dataclass(frozen=True)
 class GRW:
-    """Gaussian random walk over `order_by`, independent per `group_by` level.
+    """Gaussian random walk term for a gllvm regression.
 
-    sigma is the innovation standard deviation: the step size of the walk.
-    Assumes equally spaced time steps with none missing. Emits (n_obs, n_target).
+    At each time step the process increments by a Normal(0, sigma) draw.
+    Assumes equally spaced, fully observed time steps within each group.
+
+    Attributes:
+        name: Sample-site prefix. The cumulative walk is stored under a
+            deterministic site with this name.
+        order_by: Covariate name whose unique sorted values define the
+            time axis.
+        group_by: Optional covariate name giving a grouping factor. An
+            independent walk is drawn per level. Defaults to None.
+        varies_over_variables: If True, an independent walk is drawn for
+            each response variable. Defaults to True.
+        scale: ``Param`` for the innovation standard deviation sigma.
+            Defaults to HalfNormal(1).
     """
     name: str
     order_by: str
@@ -35,13 +47,27 @@ class GRW:
 
 @dataclass(frozen=True)
 class AR1:
-    """Stationary first-order autoregressive process over `order_by`.
+    """Stationary first-order autoregressive term for a gllvm regression.
 
-    phi is the persistence (correlation between consecutive steps), sigma the
-    innovation standard deviation. The x_1 scale is the stationary marginal
-    standard deviation, so the process has constant variance sigma^2/(1 - phi^2)
-    throughout rather than warming up from zero.
-    Assumes equally spaced time steps with none missing. Emits (n_obs, n_target).
+    The process is initialised at its stationary marginal standard
+    deviation ``sigma / sqrt(1 - phi^2)`` so that variance is constant
+    across time rather than warming up from zero.
+    Assumes equally spaced, fully observed time steps within each group.
+
+    Attributes:
+        name: Sample-site prefix. The AR(1) trajectory is stored under
+            a deterministic site with this name.
+        order_by: Covariate name whose unique sorted values define the
+            time axis.
+        group_by: Optional covariate name giving a grouping factor. An
+            independent process is drawn per level. Defaults to None.
+        varies_over_variables: If True, an independent process is drawn
+            for each response variable. Defaults to True.
+        scale: ``Param`` for the innovation standard deviation sigma.
+            Defaults to HalfNormal(1).
+        phi: ``Param`` for the autoregressive persistence coefficient
+            (correlation between consecutive steps). Defaults to
+            Beta(3, 3), which is symmetric on (0, 1).
     """
     name: str
     order_by: str

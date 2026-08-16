@@ -40,6 +40,34 @@ def _pad_by_group(X, idx, n_groups):
 
 @dataclass(frozen=True)
 class ExactGP:
+    """Exact Gaussian process term for a gllvm regression.
+
+    Computes ``f = L @ z`` where L is the Cholesky factor of the kernel
+    matrix and z are standard-normal draws. Observations are padded into
+    a dense (n_groups, n_max_points, dim) tensor so that group-wise
+    covariance matrices can be computed in a single vmap pass.
+
+    Might need manual jax.config.update("jax_enable_x64", True) to prevent underflow.
+
+    Attributes:
+        name: Sample-site prefix. The GP realisation is stored under
+            a deterministic site with this name.
+        predictors: Covariate name(s) used as GP inputs.
+        kernel: A callable ``kernel(params) -> tinygp.kernels.Kernel``
+            that builds the kernel from a dict of sampled parameters.
+        params: Mapping from parameter name to ``Param`` instance. Each
+            entry is sampled and passed to `kernel`.
+        group_by: Optional covariate name giving a grouping factor. A
+            separate GP is drawn per level. None means one shared GP.
+            Defaults to None.
+        varies_over_variables: If True, an independent GP realisation is
+            drawn for each response variable; if False, a single
+            realisation is broadcast. Defaults to True.
+        jitter: Small constant added to the kernel diagonal before
+            Cholesky decomposition for numerical stability.
+            Defaults to 1e-6.
+    """
+    
     name: str
     predictors: str | Sequence[str]
     kernel: Callable[[dict], kernels.Kernel]
@@ -87,6 +115,35 @@ class ExactGP:
 # hsgp adapted from https://num.pyro.ai/en/stable/_modules/numpyro/contrib/hsgp/approximation.html
 @dataclass(frozen=True)
 class HSGP:
+    """Hilbert-space approximate Gaussian process term for a gllvm regression.
+
+    Replaces the exact kernel matrix with a truncated basis-function
+    expansion following the HSGP method, trading a small approximation
+    error for O(n * m) rather than O(n^3) cost. Supports Matérn and
+    squared-exponential kernels.
+
+    Attributes:
+        name: Sample-site prefix. The GP realisation is stored under a
+            deterministic site with this name.
+        predictors: Covariate name(s) used as GP inputs.
+        kernel: Kernel family, either ``"Matern"`` or ``"ExpSquared"``.
+        ell: Boundary factor(s) for the Laplacian eigenfunctions. A
+            scalar applies to all input dimensions; a sequence specifies
+            per-dimension values.
+        m: Number of basis functions. A scalar applies to all input
+            dimensions; a sequence specifies per-dimension counts.
+        nu: Smoothness parameter for the Matérn kernel. Ignored when
+            kernel is ``"ExpSquared"``. Defaults to 1.5.
+        group_by: Optional covariate name giving a grouping factor.
+            Defaults to None.
+        varies_over_variables: If True, an independent GP realisation is
+            drawn for each response variable. Defaults to True.
+        amplitude: ``Param`` for the kernel amplitude (marginal standard
+            deviation). Defaults to a fixed value of 1.0.
+        length: ``Param`` for the kernel lengthscale. Defaults to
+            InverseGamma(5, 5) sampled independently per variable.
+    """
+    
     name: str
     predictors: str | Sequence[str]
     kernel: Literal["Matern", "ExpSquared"]

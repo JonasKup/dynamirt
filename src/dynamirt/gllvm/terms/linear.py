@@ -16,28 +16,30 @@ import jax.numpy as jnp
 @dataclass(frozen=True)
 class Linear:
     
-    """Linear term `X @ coef` for a gllvm regression.
+    """Linear term ``X @ coef`` for a gllvm regression.
 
-    Contributes (n_obs, n_target) where n_target is number of variables (full rank), number of latents (reduced rank),
-    or 1 broadcast over the stack if `varies_over_variables` is False.
+    Contributes an array of shape (n_obs, n_target) where n_target is the
+    number of response variables (full-rank predictor), the number of
+    latent dimensions (reduced-rank predictor), or 1 (broadcast) when
+    ``varies_over_variables`` is False.
 
     Attributes:
-        name: sample-site prefix; the assembled coefficient is stored as a
-            deterministic site under this name.
-        predictors: covariate key(s) to regress on
-        group_by: covariate key giving a grouping factor; a separate coefficient
-            is drawn per level. None means a single level.
-        constraint: "reference_coding" fixes the first group level to zero.
-        pool_over_groups: share hyperparameters across group levels.
-        pool_over_variables: share hyperparameters across variables/latents.
-        varies_over_variables: draw one coefficient per variable/latent rather
-            than a single one broadcast over all of them.
-        corr: "predictors" correlates coefficients across covariates, "variables"
-            across variables/latents, via an LKJ Cholesky factor. "both" correlates
-            across covariates AND variables/latents.
-        prior: prior on the raw coefficient (a non-centered offset when pooling).
-        loc_prior: prior on the hyper-mean; used only when pooling.
-        scale_prior: prior on the hyper-scale; used only when pooling.
+        name: Sample-site prefix. The assembled coefficient tensor is
+            stored as a deterministic site under this name.
+        predictors: Covariate name or sequence of names to regress on.
+        group_by: Optional covariate name giving a grouping factor. A
+            separate coefficient vector is drawn per level. Defaults to
+            None (single level).
+        constraint: ``"reference_coding"`` fixes the first group level's
+            coefficients to zero. Defaults to None.
+        corr: Axis along which to introduce LKJ-Cholesky correlations
+            among coefficients. ``"predictors"`` correlates across
+            covariates, ``"variables"`` across response variables or
+            latent dimensions, ``"both"`` across both jointly. Defaults
+            to None.
+        coef: ``Param`` controlling the prior and pooling behaviour of
+            the raw coefficients. Defaults to Normal(0, 1) sampled
+            independently per group and per variable.
     """
     
     name: str
