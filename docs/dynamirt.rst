@@ -28,6 +28,22 @@ dynamirt.fit module
    :show-inheritance:
    :undoc-members:
 
+dynamirt.loadings module
+------------------------
+
+.. automodule:: dynamirt.loadings
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+dynamirt.terms module
+---------------------
+
+.. automodule:: dynamirt.terms
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
 Module contents
 ---------------
 

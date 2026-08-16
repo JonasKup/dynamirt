@@ -293,19 +293,7 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="dynamirt.gllvm.html#module-dynamirt.gllvm">Module contents</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="dynamirt.gllvm.html#dynamirt.gllvm.Linear"><code class="docutils literal notranslate"><span class="pre">Linear</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="dynamirt.gllvm.html#dynamirt.gllvm.Linear.coef"><code class="docutils literal notranslate"><span class="pre">Linear.coef</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="dynamirt.gllvm.html#dynamirt.gllvm.Linear.constraint"><code class="docutils literal notranslate"><span class="pre">Linear.constraint</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="dynamirt.gllvm.html#dynamirt.gllvm.Linear.corr"><code class="docutils literal notranslate"><span class="pre">Linear.corr</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="dynamirt.gllvm.html#dynamirt.gllvm.Linear.group_by"><code class="docutils literal notranslate"><span class="pre">Linear.group_by</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="dynamirt.gllvm.html#dynamirt.gllvm.Linear.name"><code class="docutils literal notranslate"><span class="pre">Linear.name</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="dynamirt.gllvm.html#dynamirt.gllvm.Linear.predictors"><code class="docutils literal notranslate"><span class="pre">Linear.predictors</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="dynamirt.gllvm.html#dynamirt.gllvm.gllvm"><code class="docutils literal notranslate"><span class="pre">gllvm()</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="dynamirt.gllvm.html#module-dynamirt.gllvm">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -434,8 +422,629 @@ instance, and svi_result is the <code class="docutils literal notranslate"><span
 </dd></dl>
 
 </section>
+<section id="module-dynamirt.loadings">
+<span id="dynamirt-loadings-module"></span><h2>dynamirt.loadings module<a class="headerlink" href="#module-dynamirt.loadings" title="Link to this heading">¶</a></h2>
+</section>
+<section id="module-dynamirt.terms">
+<span id="dynamirt-terms-module"></span><h2>dynamirt.terms module<a class="headerlink" href="#module-dynamirt.terms" title="Link to this heading">¶</a></h2>
+</section>
 <section id="module-dynamirt">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-dynamirt" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="dynamirt.AR1">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">dynamirt.</span></span><span class="sig-name descname"><span class="pre">AR1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order_by</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_by</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">varies_over_variables</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="dynamirt.gllvm.html#dynamirt.gllvm.parameters.Param" title="dynamirt.gllvm.parameters.Param"><span class="pre">Param</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Param(prior=&lt;numpyro.distributions.continuous.HalfNormal</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7c31fbc5dc10</span> <span class="pre">with</span> <span class="pre">batch</span> <span class="pre">shape</span> <span class="pre">()</span> <span class="pre">and</span> <span class="pre">event</span> <span class="pre">shape</span> <span class="pre">()&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">by_group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'shared'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">by_variable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'shared')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="dynamirt.gllvm.html#dynamirt.gllvm.parameters.Param" title="dynamirt.gllvm.parameters.Param"><span class="pre">Param</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Param(prior=&lt;numpyro.distributions.continuous.Beta</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7c31fbc5cef0</span> <span class="pre">with</span> <span class="pre">batch</span> <span class="pre">shape</span> <span class="pre">()</span> <span class="pre">and</span> <span class="pre">event</span> <span class="pre">shape</span> <span class="pre">()&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">by_group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'shared'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">by_variable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'shared')</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dynamirt.AR1" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Stationary first-order autoregressive term for a gllvm regression.</p>
+<p>The process is initialised at its stationary marginal standard
+deviation <code class="docutils literal notranslate"><span class="pre">sigma</span> <span class="pre">/</span> <span class="pre">sqrt(1</span> <span class="pre">-</span> <span class="pre">phi^2)</span></code> so that variance is constant
+across time rather than warming up from zero.
+Assumes equally spaced, fully observed time steps within each group.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – Sample-site prefix. The AR(1) trajectory is stored under
+a deterministic site with this name.</p></li>
+<li><p><strong>order_by</strong> (<em>str</em>) – Covariate name whose unique sorted values define the
+time axis.</p></li>
+<li><p><strong>group_by</strong> (<em>str</em><em> | </em><em>None</em>) – Optional covariate name giving a grouping factor. An
+independent process is drawn per level. Defaults to None.</p></li>
+<li><p><strong>varies_over_variables</strong> (<em>bool</em>) – If True, an independent process is drawn
+for each response variable. Defaults to True.</p></li>
+<li><p><strong>scale</strong> (<a class="reference internal" href="dynamirt.gllvm.html#dynamirt.gllvm.parameters.Param" title="dynamirt.gllvm.parameters.Param"><em>dynamirt.gllvm.parameters.Param</em></a>) – <code class="docutils literal notranslate"><span class="pre">Param</span></code> for the innovation standard deviation sigma.
+Defaults to HalfNormal(1).</p></li>
+<li><p><strong>phi</strong> (<a class="reference internal" href="dynamirt.gllvm.html#dynamirt.gllvm.parameters.Param" title="dynamirt.gllvm.parameters.Param"><em>dynamirt.gllvm.parameters.Param</em></a>) – <code class="docutils literal notranslate"><span class="pre">Param</span></code> for the autoregressive persistence coefficient
+(correlation between consecutive steps). Defaults to
+Beta(3, 3), which is symmetric on (0, 1).</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dynamirt.AR1.group_by">
+<span class="sig-name descname"><span class="pre">group_by</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#dynamirt.AR1.group_by" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dynamirt.AR1.name">
+<span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#dynamirt.AR1.name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dynamirt.AR1.order_by">
+<span class="sig-name descname"><span class="pre">order_by</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#dynamirt.AR1.order_by" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dynamirt.AR1.phi">
+<span class="sig-name descname"><span class="pre">phi</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="dynamirt.gllvm.html#dynamirt.gllvm.parameters.Param" title="dynamirt.gllvm.parameters.Param"><span class="pre">Param</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Param(prior=&lt;numpyro.distributions.continuous.Beta</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7c31fbc5cef0</span> <span class="pre">with</span> <span class="pre">batch</span> <span class="pre">shape</span> <span class="pre">()</span> <span class="pre">and</span> <span class="pre">event</span> <span class="pre">shape</span> <span class="pre">()&gt;,</span> <span class="pre">by_group='shared',</span> <span class="pre">by_variable='shared')</span></span><a class="headerlink" href="#dynamirt.AR1.phi" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dynamirt.AR1.scale">
+<span class="sig-name descname"><span class="pre">scale</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="dynamirt.gllvm.html#dynamirt.gllvm.parameters.Param" title="dynamirt.gllvm.parameters.Param"><span class="pre">Param</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Param(prior=&lt;numpyro.distributions.continuous.HalfNormal</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7c31fbc5dc10</span> <span class="pre">with</span> <span class="pre">batch</span> <span class="pre">shape</span> <span class="pre">()</span> <span class="pre">and</span> <span class="pre">event</span> <span class="pre">shape</span> <span class="pre">()&gt;,</span> <span class="pre">by_group='shared',</span> <span class="pre">by_variable='shared')</span></span><a class="headerlink" href="#dynamirt.AR1.scale" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dynamirt.AR1.varies_over_variables">
+<span class="sig-name descname"><span class="pre">varies_over_variables</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></span><a class="headerlink" href="#dynamirt.AR1.varies_over_variables" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dynamirt.Confirmatory">
+<span class="sig-prename descclassname"><span class="pre">dynamirt.</span></span><span class="sig-name descname"><span class="pre">Confirmatory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Array</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">number</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positive_anchors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Array</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">number</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">free_prior</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Distribution</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positive_prior</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Distribution</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Callable</span></span></span><a class="headerlink" href="#dynamirt.Confirmatory" title="Link to this definition">¶</a></dt>
+<dd><p>Loading matrix factory for confirmatory factor analysis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Q</strong> – Binary (n_var, n_latent) array. Q[i, j] = 1 means item i is
+allowed to load on factor j; 0 means the loading is fixed at 0.</p></li>
+<li><p><strong>positive_anchors</strong> – Optional binary array of the same shape as Q.
+Marks a subset of Q’s nonzero entries as positive-only anchor loadings.
+If None, all free loadings are unconstrained in sign.
+Defaults to None.</p></li>
+<li><p><strong>free_prior</strong> – Prior distribution for the unconstrained loadings.
+Defaults to Normal(0, 1) if None.</p></li>
+<li><p><strong>positive_prior</strong> – Prior distribution for the positive anchor loadings.
+Defaults to LogNormal(0, 0.5) if None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A <cite>loadings(ctx)</cite> function that returns the (n_var, n_latent)
+loading matrix</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="dynamirt.ExactGP">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">dynamirt.</span></span><span class="sig-name descname"><span class="pre">ExactGP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predictors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Kernel</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="dynamirt.gllvm.html#dynamirt.gllvm.parameters.Param" title="dynamirt.gllvm.parameters.Param"><span class="pre">Param</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_by</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">varies_over_variables</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jitter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-06</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dynamirt.ExactGP" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Exact Gaussian process term for a gllvm regression.</p>
+<p>Computes <code class="docutils literal notranslate"><span class="pre">f</span> <span class="pre">=</span> <span class="pre">L</span> <span class="pre">&#64;</span> <span class="pre">z</span></code> where L is the Cholesky factor of the kernel
+matrix and z are standard-normal draws. Observations are padded into
+a dense (n_groups, n_max_points, dim) tensor so that group-wise
+covariance matrices can be computed in a single vmap pass.</p>
+<p>Might need manual jax.config.update(“jax_enable_x64”, True) to prevent underflow.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – Sample-site prefix. The GP realisation is stored under
+a deterministic site with this name.</p></li>
+<li><p><strong>predictors</strong> (<em>str</em><em> | </em><em>Sequence</em><em>[</em><em>str</em><em>]</em>) – Covariate name(s) used as GP inputs.</p></li>
+<li><p><strong>kernel</strong> (<em>Callable</em><em>[</em><em>[</em><em>dict</em><em>]</em><em>, </em><em>tinygp.kernels.base.Kernel</em><em>]</em>) – A callable <code class="docutils literal notranslate"><span class="pre">kernel(params)</span> <span class="pre">-&gt;</span> <span class="pre">tinygp.kernels.Kernel</span></code>
+that builds the kernel from a dict of sampled parameters.</p></li>
+<li><p><strong>params</strong> (<em>Mapping</em><em>[</em><em>str</em><em>, </em><a class="reference internal" href="dynamirt.gllvm.html#dynamirt.gllvm.parameters.Param" title="dynamirt.gllvm.parameters.Param"><em>dynamirt.gllvm.parameters.Param</em></a><em>]</em>) – Mapping from parameter name to <code class="docutils literal notranslate"><span class="pre">Param</span></code> instance. Each
+entry is sampled and passed to <cite>kernel</cite>.</p></li>
+<li><p><strong>group_by</strong> (<em>str</em><em> | </em><em>None</em>) – Optional covariate name giving a grouping factor. A
+separate GP is drawn per level. None means one shared GP.
+Defaults to None.</p></li>
+<li><p><strong>varies_over_variables</strong> (<em>bool</em>) – If True, an independent GP realisation is
+drawn for each response variable; if False, a single
+realisation is broadcast. Defaults to True.</p></li>
+<li><p><strong>jitter</strong> (<em>float</em>) – Small constant added to the kernel diagonal before
+Cholesky decomposition for numerical stability.
+Defaults to 1e-6.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dynamirt.ExactGP.group_by">
+<span class="sig-name descname"><span class="pre">group_by</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#dynamirt.ExactGP.group_by" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dynamirt.ExactGP.jitter">
+<span class="sig-name descname"><span class="pre">jitter</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1e-06</span></span><a class="headerlink" href="#dynamirt.ExactGP.jitter" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dynamirt.ExactGP.kernel">
+<span class="sig-name descname"><span class="pre">kernel</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Kernel</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#dynamirt.ExactGP.kernel" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dynamirt.ExactGP.name">
+<span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#dynamirt.ExactGP.name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dynamirt.ExactGP.params">
+<span class="sig-name descname"><span class="pre">params</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="dynamirt.gllvm.html#dynamirt.gllvm.parameters.Param" title="dynamirt.gllvm.parameters.Param"><span class="pre">Param</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#dynamirt.ExactGP.params" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dynamirt.ExactGP.predictors">
+<span class="sig-name descname"><span class="pre">predictors</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#dynamirt.ExactGP.predictors" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dynamirt.ExactGP.varies_over_variables">
+<span class="sig-name descname"><span class="pre">varies_over_variables</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></span><a class="headerlink" href="#dynamirt.ExactGP.varies_over_variables" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dynamirt.Fixed">
+<span class="sig-prename descclassname"><span class="pre">dynamirt.</span></span><span class="sig-name descname"><span class="pre">Fixed</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Callable</span></span></span><a class="headerlink" href="#dynamirt.Fixed" title="Link to this definition">¶</a></dt>
+<dd><p>Loading matrix factory that fixes all loadings to 1 so every item loads equally on every latent factor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A <cite>loadings(ctx)</cite> function that returns a (n_var, n_latent) array of ones.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dynamirt.Full">
+<span class="sig-prename descclassname"><span class="pre">dynamirt.</span></span><span class="sig-name descname"><span class="pre">Full</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prior</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Distribution</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Callable</span></span></span><a class="headerlink" href="#dynamirt.Full" title="Link to this definition">¶</a></dt>
+<dd><p>Loading matrix factory with all loadings drawn from <cite>prior</cite>.
+For the default Normal(0, 1) this results in an unconstrained loading matrix and is
+equivalent to <cite>Confirmatory</cite> with Q of all ones and no positive anchors and will lead to
+rotational and signed-permutation invariances in most cases.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>prior</strong> – Prior distribution for each loading. Defaults to Normal(0, 1).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A <cite>loadings(ctx)</cite> function that returns a (n_var, n_latent) array
+sampled entrywise from <cite>prior</cite>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="dynamirt.GRW">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">dynamirt.</span></span><span class="sig-name descname"><span class="pre">GRW</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order_by</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_by</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">varies_over_variables</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="dynamirt.gllvm.html#dynamirt.gllvm.parameters.Param" title="dynamirt.gllvm.parameters.Param"><span class="pre">Param</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Param(prior=&lt;numpyro.distributions.continuous.HalfNormal</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7c31fbc5d0a0</span> <span class="pre">with</span> <span class="pre">batch</span> <span class="pre">shape</span> <span class="pre">()</span> <span class="pre">and</span> <span class="pre">event</span> <span class="pre">shape</span> <span class="pre">()&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">by_group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'shared'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">by_variable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'shared')</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dynamirt.GRW" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Gaussian random walk term for a gllvm regression.</p>
+<p>At each time step the process increments by a Normal(0, sigma) draw.
+Assumes equally spaced, fully observed time steps within each group.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – Sample-site prefix. The cumulative walk is stored under a
+deterministic site with this name.</p></li>
+<li><p><strong>order_by</strong> (<em>str</em>) – Covariate name whose unique sorted values define the
+time axis.</p></li>
+<li><p><strong>group_by</strong> (<em>str</em><em> | </em><em>None</em>) – Optional covariate name giving a grouping factor. An
+independent walk is drawn per level. Defaults to None.</p></li>
+<li><p><strong>varies_over_variables</strong> (<em>bool</em>) – If True, an independent walk is drawn for
+each response variable. Defaults to True.</p></li>
+<li><p><strong>scale</strong> (<a class="reference internal" href="dynamirt.gllvm.html#dynamirt.gllvm.parameters.Param" title="dynamirt.gllvm.parameters.Param"><em>dynamirt.gllvm.parameters.Param</em></a>) – <code class="docutils literal notranslate"><span class="pre">Param</span></code> for the innovation standard deviation sigma.
+Defaults to HalfNormal(1).</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dynamirt.GRW.group_by">
+<span class="sig-name descname"><span class="pre">group_by</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#dynamirt.GRW.group_by" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dynamirt.GRW.name">
+<span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#dynamirt.GRW.name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dynamirt.GRW.order_by">
+<span class="sig-name descname"><span class="pre">order_by</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#dynamirt.GRW.order_by" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dynamirt.GRW.scale">
+<span class="sig-name descname"><span class="pre">scale</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="dynamirt.gllvm.html#dynamirt.gllvm.parameters.Param" title="dynamirt.gllvm.parameters.Param"><span class="pre">Param</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Param(prior=&lt;numpyro.distributions.continuous.HalfNormal</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7c31fbc5d0a0</span> <span class="pre">with</span> <span class="pre">batch</span> <span class="pre">shape</span> <span class="pre">()</span> <span class="pre">and</span> <span class="pre">event</span> <span class="pre">shape</span> <span class="pre">()&gt;,</span> <span class="pre">by_group='shared',</span> <span class="pre">by_variable='shared')</span></span><a class="headerlink" href="#dynamirt.GRW.scale" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dynamirt.GRW.varies_over_variables">
+<span class="sig-name descname"><span class="pre">varies_over_variables</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></span><a class="headerlink" href="#dynamirt.GRW.varies_over_variables" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="dynamirt.HSGP">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">dynamirt.</span></span><span class="sig-name descname"><span class="pre">HSGP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">name:</span> <span class="pre">str,</span> <span class="pre">predictors:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">~typing.Sequence[str],</span> <span class="pre">kernel:</span> <span class="pre">~typing.Literal['Matern',</span> <span class="pre">'ExpSquared'],</span> <span class="pre">ell:</span> <span class="pre">float</span> <span class="pre">|</span> <span class="pre">~typing.Sequence[float],</span> <span class="pre">m:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">~typing.Sequence[int],</span> <span class="pre">nu:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">1.5,</span> <span class="pre">group_by:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">varies_over_variables:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True,</span> <span class="pre">amplitude:</span> <span class="pre">~dynamirt.gllvm.parameters.Param</span> <span class="pre">=</span> <span class="pre">Param(prior=1.0,</span> <span class="pre">by_group='shared',</span> <span class="pre">by_variable='shared'),</span> <span class="pre">length:</span> <span class="pre">~dynamirt.gllvm.parameters.Param</span> <span class="pre">=</span> <span class="pre">Param(prior=&lt;numpyro.distributions.continuous.InverseGamma</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7c31e035f170</span> <span class="pre">with</span> <span class="pre">batch</span> <span class="pre">shape</span> <span class="pre">()</span> <span class="pre">and</span> <span class="pre">event</span> <span class="pre">shape</span> <span class="pre">()&gt;,</span> <span class="pre">by_group='shared',</span> <span class="pre">by_variable='free')</span></em><span class="sig-paren">)</span><a class="headerlink" href="#dynamirt.HSGP" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Hilbert-space approximate Gaussian process term for a gllvm regression.</p>
+<p>Replaces the exact kernel matrix with a truncated basis-function
+expansion following the HSGP method, trading a small approximation
+error for O(n * m) rather than O(n^3) cost. Supports Matérn and
+squared-exponential kernels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – Sample-site prefix. The GP realisation is stored under a
+deterministic site with this name.</p></li>
+<li><p><strong>predictors</strong> (<em>str</em><em> | </em><em>Sequence</em><em>[</em><em>str</em><em>]</em>) – Covariate name(s) used as GP inputs.</p></li>
+<li><p><strong>kernel</strong> (<em>Literal</em><em>[</em><em>'Matern'</em><em>, </em><em>'ExpSquared'</em><em>]</em>) – Kernel family, either <code class="docutils literal notranslate"><span class="pre">&quot;Matern&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;ExpSquared&quot;</span></code>.</p></li>
+<li><p><strong>ell</strong> (<em>float</em><em> | </em><em>Sequence</em><em>[</em><em>float</em><em>]</em>) – Boundary factor(s) for the Laplacian eigenfunctions. A
+scalar applies to all input dimensions; a sequence specifies
+per-dimension values.</p></li>
+<li><p><strong>m</strong> (<em>int</em><em> | </em><em>Sequence</em><em>[</em><em>int</em><em>]</em>) – Number of basis functions. A scalar applies to all input
+dimensions; a sequence specifies per-dimension counts.</p></li>
+<li><p><strong>nu</strong> (<em>float</em>) – Smoothness parameter for the Matérn kernel. Ignored when
+kernel is <code class="docutils literal notranslate"><span class="pre">&quot;ExpSquared&quot;</span></code>. Defaults to 1.5.</p></li>
+<li><p><strong>group_by</strong> (<em>str</em><em> | </em><em>None</em>) – Optional covariate name giving a grouping factor.
+Defaults to None.</p></li>
+<li><p><strong>varies_over_variables</strong> (<em>bool</em>) – If True, an independent GP realisation is
+drawn for each response variable. Defaults to True.</p></li>
+<li><p><strong>amplitude</strong> (<a class="reference internal" href="dynamirt.gllvm.html#dynamirt.gllvm.parameters.Param" title="dynamirt.gllvm.parameters.Param"><em>dynamirt.gllvm.parameters.Param</em></a>) – <code class="docutils literal notranslate"><span class="pre">Param</span></code> for the kernel amplitude (marginal standard
+deviation). Defaults to a fixed value of 1.0.</p></li>
+<li><p><strong>length</strong> (<a class="reference internal" href="dynamirt.gllvm.html#dynamirt.gllvm.parameters.Param" title="dynamirt.gllvm.parameters.Param"><em>dynamirt.gllvm.parameters.Param</em></a>) – <code class="docutils literal notranslate"><span class="pre">Param</span></code> for the kernel lengthscale. Defaults to
+InverseGamma(5, 5) sampled independently per variable.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dynamirt.HSGP.amplitude">
+<span class="sig-name descname"><span class="pre">amplitude</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="dynamirt.gllvm.html#dynamirt.gllvm.parameters.Param" title="dynamirt.gllvm.parameters.Param"><span class="pre">Param</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Param(prior=1.0,</span> <span class="pre">by_group='shared',</span> <span class="pre">by_variable='shared')</span></span><a class="headerlink" href="#dynamirt.HSGP.amplitude" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dynamirt.HSGP.ell">
+<span class="sig-name descname"><span class="pre">ell</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#dynamirt.HSGP.ell" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dynamirt.HSGP.group_by">
+<span class="sig-name descname"><span class="pre">group_by</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#dynamirt.HSGP.group_by" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dynamirt.HSGP.kernel">
+<span class="sig-name descname"><span class="pre">kernel</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'Matern'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'ExpSquared'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#dynamirt.HSGP.kernel" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dynamirt.HSGP.length">
+<span class="sig-name descname"><span class="pre">length</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="dynamirt.gllvm.html#dynamirt.gllvm.parameters.Param" title="dynamirt.gllvm.parameters.Param"><span class="pre">Param</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Param(prior=&lt;numpyro.distributions.continuous.InverseGamma</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7c31e035f170</span> <span class="pre">with</span> <span class="pre">batch</span> <span class="pre">shape</span> <span class="pre">()</span> <span class="pre">and</span> <span class="pre">event</span> <span class="pre">shape</span> <span class="pre">()&gt;,</span> <span class="pre">by_group='shared',</span> <span class="pre">by_variable='free')</span></span><a class="headerlink" href="#dynamirt.HSGP.length" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dynamirt.HSGP.m">
+<span class="sig-name descname"><span class="pre">m</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#dynamirt.HSGP.m" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dynamirt.HSGP.name">
+<span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#dynamirt.HSGP.name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dynamirt.HSGP.nu">
+<span class="sig-name descname"><span class="pre">nu</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1.5</span></span><a class="headerlink" href="#dynamirt.HSGP.nu" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dynamirt.HSGP.predictors">
+<span class="sig-name descname"><span class="pre">predictors</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#dynamirt.HSGP.predictors" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dynamirt.HSGP.varies_over_variables">
+<span class="sig-name descname"><span class="pre">varies_over_variables</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></span><a class="headerlink" href="#dynamirt.HSGP.varies_over_variables" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="dynamirt.Linear">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">dynamirt.</span></span><span class="sig-name descname"><span class="pre">Linear</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">name:</span> <span class="pre">str,</span> <span class="pre">predictors:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">~typing.Sequence[str],</span> <span class="pre">group_by:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">constraint:</span> <span class="pre">~typing.Literal[None,</span> <span class="pre">'reference_coding']</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">corr:</span> <span class="pre">~typing.Literal[None,</span> <span class="pre">'predictors',</span> <span class="pre">'variables',</span> <span class="pre">'both']</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">coef:</span> <span class="pre">~dynamirt.gllvm.parameters.Param</span> <span class="pre">=</span> <span class="pre">Param(prior=&lt;numpyro.distributions.continuous.Normal</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7c32059ca3c0</span> <span class="pre">with</span> <span class="pre">batch</span> <span class="pre">shape</span> <span class="pre">()</span> <span class="pre">and</span> <span class="pre">event</span> <span class="pre">shape</span> <span class="pre">()&gt;,</span> <span class="pre">by_group='free',</span> <span class="pre">by_variable='free')</span></em><span class="sig-paren">)</span><a class="headerlink" href="#dynamirt.Linear" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Linear term <code class="docutils literal notranslate"><span class="pre">X</span> <span class="pre">&#64;</span> <span class="pre">coef</span></code> for a gllvm regression.</p>
+<p>Contributes an array of shape (n_obs, n_target) where n_target is the
+number of response variables (full-rank predictor), the number of
+latent dimensions (reduced-rank predictor).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – Sample-site prefix. The assembled coefficient tensor is
+stored as a deterministic site under this name.</p></li>
+<li><p><strong>predictors</strong> (<em>str</em><em> | </em><em>Sequence</em><em>[</em><em>str</em><em>]</em>) – Covariate name or sequence of names to regress on.</p></li>
+<li><p><strong>group_by</strong> (<em>str</em><em> | </em><em>None</em>) – Optional covariate name giving a grouping factor. A
+separate coefficient vector is drawn per level. Defaults to
+None (single level).</p></li>
+<li><p><strong>constraint</strong> (<em>Literal</em><em>[</em><em>None</em><em>, </em><em>'reference_coding'</em><em>]</em>) – <code class="docutils literal notranslate"><span class="pre">&quot;reference_coding&quot;</span></code> fixes the first group level’s
+coefficients to zero. Defaults to None.</p></li>
+<li><p><strong>corr</strong> (<em>Literal</em><em>[</em><em>None</em><em>, </em><em>'predictors'</em><em>, </em><em>'variables'</em><em>, </em><em>'both'</em><em>]</em>) – Axis along which to introduce LKJ-Cholesky correlations
+among coefficients. <code class="docutils literal notranslate"><span class="pre">&quot;predictors&quot;</span></code> correlates across
+covariates, <code class="docutils literal notranslate"><span class="pre">&quot;variables&quot;</span></code> across response variables or
+latent dimensions, <code class="docutils literal notranslate"><span class="pre">&quot;both&quot;</span></code> across both jointly. Defaults
+to None.</p></li>
+<li><p><strong>coef</strong> (<a class="reference internal" href="dynamirt.gllvm.html#dynamirt.gllvm.parameters.Param" title="dynamirt.gllvm.parameters.Param"><em>dynamirt.gllvm.parameters.Param</em></a>) – <code class="docutils literal notranslate"><span class="pre">Param</span></code> controlling the prior and pooling behaviour of
+the raw coefficients. Defaults to Normal(0, 1) sampled
+independently per group and per variable.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dynamirt.Linear.coef">
+<span class="sig-name descname"><span class="pre">coef</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="dynamirt.gllvm.html#dynamirt.gllvm.parameters.Param" title="dynamirt.gllvm.parameters.Param"><span class="pre">Param</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Param(prior=&lt;numpyro.distributions.continuous.Normal</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7c32059ca3c0</span> <span class="pre">with</span> <span class="pre">batch</span> <span class="pre">shape</span> <span class="pre">()</span> <span class="pre">and</span> <span class="pre">event</span> <span class="pre">shape</span> <span class="pre">()&gt;,</span> <span class="pre">by_group='free',</span> <span class="pre">by_variable='free')</span></span><a class="headerlink" href="#dynamirt.Linear.coef" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dynamirt.Linear.constraint">
+<span class="sig-name descname"><span class="pre">constraint</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'reference_coding'</span></span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#dynamirt.Linear.constraint" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dynamirt.Linear.corr">
+<span class="sig-name descname"><span class="pre">corr</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'predictors'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'variables'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'both'</span></span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#dynamirt.Linear.corr" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dynamirt.Linear.group_by">
+<span class="sig-name descname"><span class="pre">group_by</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#dynamirt.Linear.group_by" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dynamirt.Linear.name">
+<span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></span><a class="headerlink" href="#dynamirt.Linear.name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dynamirt.Linear.predictors">
+<span class="sig-name descname"><span class="pre">predictors</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#dynamirt.Linear.predictors" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="dynamirt.Param">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">dynamirt.</span></span><span class="sig-name descname"><span class="pre">Param</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prior</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Distribution</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">by_group</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'shared'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'free'</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="dynamirt.gllvm.html#dynamirt.gllvm.parameters.Pool" title="dynamirt.gllvm.parameters.Pool"><span class="pre">Pool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'shared'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">by_variable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'shared'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'free'</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="dynamirt.gllvm.html#dynamirt.gllvm.parameters.Pool" title="dynamirt.gllvm.parameters.Pool"><span class="pre">Pool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'shared'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dynamirt.Param" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Broadcastable parameter with optional non-centered partial pooling.</p>
+<p>Wraps a scalar constant or a prior distribution and manages its
+expansion along the group and variable/latent axes of a term. When
+either axis is set to a <code class="docutils literal notranslate"><span class="pre">Pool</span></code> instance, a non-centered
+parameterisation is used: a shared hyper-mean and hyper-scale are
+sampled, and the raw draw is shifted and scaled accordingly.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>prior</strong> (<em>numpyro.distributions.distribution.Distribution</em><em> | </em><em>float</em>) – Either a fixed scalar value (no sampling) or a
+<code class="docutils literal notranslate"><span class="pre">numpyro.distributions.Distribution</span></code> used as the prior.</p></li>
+<li><p><strong>by_group</strong> (<em>Literal</em><em>[</em><em>'shared'</em><em>, </em><em>'free'</em><em>] </em><em>| </em><em>dynamirt.gllvm.parameters.Pool</em>) – <code class="docutils literal notranslate"><span class="pre">&quot;shared&quot;</span></code> broadcasts a single value across groups,
+<code class="docutils literal notranslate"><span class="pre">&quot;free&quot;</span></code> samples independently per group, and a <code class="docutils literal notranslate"><span class="pre">Pool</span></code>
+instance applies non-centered partial pooling across groups.
+Defaults to <code class="docutils literal notranslate"><span class="pre">&quot;shared&quot;</span></code>.</p></li>
+<li><p><strong>by_variable</strong> (<em>Literal</em><em>[</em><em>'shared'</em><em>, </em><em>'free'</em><em>] </em><em>| </em><em>dynamirt.gllvm.parameters.Pool</em>) – Same as by_group but along the variable/latent
+axis. Defaults to <code class="docutils literal notranslate"><span class="pre">&quot;shared&quot;</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="dynamirt.Param.apply_partial_pooling">
+<span class="sig-name descname"><span class="pre">apply_partial_pooling</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_groups</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trailing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dynamirt.Param.apply_partial_pooling" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dynamirt.Param.by_group">
+<span class="sig-name descname"><span class="pre">by_group</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'shared'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'free'</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="dynamirt.gllvm.html#dynamirt.gllvm.parameters.Pool" title="dynamirt.gllvm.parameters.Pool"><span class="pre">Pool</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'shared'</span></span><a class="headerlink" href="#dynamirt.Param.by_group" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dynamirt.Param.by_variable">
+<span class="sig-name descname"><span class="pre">by_variable</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'shared'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'free'</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="dynamirt.gllvm.html#dynamirt.gllvm.parameters.Pool" title="dynamirt.gllvm.parameters.Pool"><span class="pre">Pool</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'shared'</span></span><a class="headerlink" href="#dynamirt.Param.by_variable" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dynamirt.Param.prior">
+<span class="sig-name descname"><span class="pre">prior</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Distribution</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span></span><a class="headerlink" href="#dynamirt.Param.prior" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dynamirt.Param.sample_raw">
+<span class="sig-name descname"><span class="pre">sample_raw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_groups</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trailing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dynamirt.Param.sample_raw" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="dynamirt.Pool">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">dynamirt.</span></span><span class="sig-name descname"><span class="pre">Pool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="dynamirt.gllvm.html#dynamirt.gllvm.parameters.Param" title="dynamirt.gllvm.parameters.Param"><span class="pre">Param</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Param(prior=&lt;numpyro.distributions.continuous.Normal</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7c32059c9af0</span> <span class="pre">with</span> <span class="pre">batch</span> <span class="pre">shape</span> <span class="pre">()</span> <span class="pre">and</span> <span class="pre">event</span> <span class="pre">shape</span> <span class="pre">()&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">by_group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'shared'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">by_variable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'shared')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="dynamirt.gllvm.html#dynamirt.gllvm.parameters.Param" title="dynamirt.gllvm.parameters.Param"><span class="pre">Param</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Param(prior=&lt;numpyro.distributions.continuous.HalfNormal</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7c32059c9eb0</span> <span class="pre">with</span> <span class="pre">batch</span> <span class="pre">shape</span> <span class="pre">()</span> <span class="pre">and</span> <span class="pre">event</span> <span class="pre">shape</span> <span class="pre">()&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">by_group</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'shared'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">by_variable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'shared')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Transform</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dynamirt.Pool" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Hyperparameters for non-centered partial pooling in <code class="docutils literal notranslate"><span class="pre">Param</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>loc</strong> (<a class="reference internal" href="dynamirt.gllvm.html#dynamirt.gllvm.parameters.Param" title="dynamirt.gllvm.parameters.Param"><em>dynamirt.gllvm.parameters.Param</em></a>) – <code class="docutils literal notranslate"><span class="pre">Param</span></code> for the hyper-mean. Defaults to Normal(0, 1).</p></li>
+<li><p><strong>scale</strong> (<a class="reference internal" href="dynamirt.gllvm.html#dynamirt.gllvm.parameters.Param" title="dynamirt.gllvm.parameters.Param"><em>dynamirt.gllvm.parameters.Param</em></a>) – <code class="docutils literal notranslate"><span class="pre">Param</span></code> for the hyper-scale. Defaults to HalfNormal(0.5).</p></li>
+<li><p><strong>transform</strong> (<em>numpyro.distributions.transforms.Transform</em>) – Bijective transform applied after the affine
+<code class="docutils literal notranslate"><span class="pre">loc</span> <span class="pre">+</span> <span class="pre">scale</span> <span class="pre">*</span> <span class="pre">raw</span></code> step (e.g. <code class="docutils literal notranslate"><span class="pre">ExpTransform</span></code> to
+constrain the result to be positive). Defaults to the
+identity transform.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dynamirt.Pool.loc">
+<span class="sig-name descname"><span class="pre">loc</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="dynamirt.gllvm.html#dynamirt.gllvm.parameters.Param" title="dynamirt.gllvm.parameters.Param"><span class="pre">Param</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Param(prior=&lt;numpyro.distributions.continuous.Normal</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7c32059c9af0</span> <span class="pre">with</span> <span class="pre">batch</span> <span class="pre">shape</span> <span class="pre">()</span> <span class="pre">and</span> <span class="pre">event</span> <span class="pre">shape</span> <span class="pre">()&gt;,</span> <span class="pre">by_group='shared',</span> <span class="pre">by_variable='shared')</span></span><a class="headerlink" href="#dynamirt.Pool.loc" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dynamirt.Pool.scale">
+<span class="sig-name descname"><span class="pre">scale</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="dynamirt.gllvm.html#dynamirt.gllvm.parameters.Param" title="dynamirt.gllvm.parameters.Param"><span class="pre">Param</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">Param(prior=&lt;numpyro.distributions.continuous.HalfNormal</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7c32059c9eb0</span> <span class="pre">with</span> <span class="pre">batch</span> <span class="pre">shape</span> <span class="pre">()</span> <span class="pre">and</span> <span class="pre">event</span> <span class="pre">shape</span> <span class="pre">()&gt;,</span> <span class="pre">by_group='shared',</span> <span class="pre">by_variable='shared')</span></span><a class="headerlink" href="#dynamirt.Pool.scale" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="dynamirt.Pool.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Transform</span></span><a class="headerlink" href="#dynamirt.Pool.transform" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dynamirt.Sparsity">
+<span class="sig-prename descclassname"><span class="pre">dynamirt.</span></span><span class="sig-name descname"><span class="pre">Sparsity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tau0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slab_scale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slab_df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Callable</span></span></span><a class="headerlink" href="#dynamirt.Sparsity" title="Link to this definition">¶</a></dt>
+<dd><p>Loading matrix factory with regularized horseshoe sparsity prior.</p>
+<p>Applies the regularised horseshoe prior of Piironen &amp; Vehtari (2017)
+to the loading matrix, encouraging most loadings toward zero while
+allowing a sparse subset to remain large.</p>
+<dl class="simple">
+<dt>Reference:</dt><dd><p>Juho Piironen. Aki Vehtari (2017). Electron. J. Statist. 11 (2) 5018 - 5051
+<a class="reference external" href="https://doi.org/10.1214/17-EJS1337SI">https://doi.org/10.1214/17-EJS1337SI</a></p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tau0</strong> – Global shrinkage scale. A sensible default follows
+Eq. 3.12: <code class="docutils literal notranslate"><span class="pre">p0</span> <span class="pre">/</span> <span class="pre">(D</span> <span class="pre">-</span> <span class="pre">p0)</span> <span class="pre">*</span> <span class="pre">sigma</span> <span class="pre">/</span> <span class="pre">sqrt(n)</span></code> where p0 is
+the expected number of non-zero loadings and D is the total
+number of loadings. Defaults to 1.0.</p></li>
+<li><p><strong>slab_scale</strong> – Typical magnitude of a loading that escapes
+shrinkage. Controls the width of the regularising slab.
+Defaults to 1.0.</p></li>
+<li><p><strong>slab_df</strong> – Degrees of freedom of the Student-t slab controlling
+how heavy-tailed the non-zero loadings may be. Defaults
+to 4.0.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A <cite>loadings(ctx)</cite> function that returns the (n_var, n_latent)
+loading matrix</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dynamirt.dynamirt">
+<span class="sig-prename descclassname"><span class="pre">dynamirt.</span></span><span class="sig-name descname"><span class="pre">dynamirt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'1PL'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'2PL'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'3PL'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'4PL'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'GRM'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'PCM'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'GPCM'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'2PL'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_latent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loadings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latent_fn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">DIF</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_residuals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">corr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_type_kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Callable</span></span></span><a class="headerlink" href="#dynamirt.dynamirt" title="Link to this definition">¶</a></dt>
+<dd><p>Build a MIRT model with optionally time evolving latent traits.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_type</strong> – IRT response family. Dichotomous options:
+<code class="docutils literal notranslate"><span class="pre">&quot;1PL&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;2PL&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;3PL&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;4PL&quot;</span></code>. Polytomous
+options: <code class="docutils literal notranslate"><span class="pre">&quot;GRM&quot;</span></code> (graded response model),
+<code class="docutils literal notranslate"><span class="pre">&quot;PCM&quot;</span></code> (partial credit model),
+<code class="docutils literal notranslate"><span class="pre">&quot;GPCM&quot;</span></code> (generalised partial credit model).
+Defaults to <code class="docutils literal notranslate"><span class="pre">&quot;2PL&quot;</span></code>.</p></li>
+<li><p><strong>n_latent</strong> – Dimensionality of the latent trait space. Defaults
+to 1.</p></li>
+<li><p><strong>loadings</strong> – Loading-matrix factory (e.g. <code class="docutils literal notranslate"><span class="pre">Fixed()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">Full()</span></code>, <code class="docutils literal notranslate"><span class="pre">Confirmatory(Q)</span></code>). Defaults to <code class="docutils literal notranslate"><span class="pre">Full()</span></code>
+(unconstrained), except for <code class="docutils literal notranslate"><span class="pre">&quot;1PL&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;PCM&quot;</span></code> where
+it is forced to <code class="docutils literal notranslate"><span class="pre">Fixed()</span></code>.</p></li>
+<li><p><strong>latent_fn</strong> – Sequence of latent-regression term callables (e.g.
+time-series terms, covariate effects on theta). If None
+and <code class="docutils literal notranslate"><span class="pre">include_residuals</span></code> is not explicitly False, an
+i.i.d. residual term is added automatically.</p></li>
+<li><p><strong>DIF</strong> – Sequence of full-rank regression term callables added
+alongside the item intercepts to model differential item
+functioning. Defaults to None.</p></li>
+<li><p><strong>include_residuals</strong> – Whether to append an i.i.d. residual latent
+term. Defaults to True when <code class="docutils literal notranslate"><span class="pre">latent_fn</span></code> is None,
+False otherwise.</p></li>
+<li><p><strong>corr</strong> – If True and residuals are included, an LKJ-Cholesky
+correlation structure is estimated across latent
+dimensions. Defaults to True.</p></li>
+<li><p><strong>model_type_kwargs</strong> – Extra keyword arguments forwarded to the
+IRT family constructor for <cite>model_type</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A numpyro function with signature <code class="docutils literal notranslate"><span class="pre">model(responses,</span> <span class="pre">covariates,</span> <span class="pre">...)</span></code>
+ready for use with <code class="docutils literal notranslate"><span class="pre">fit_mcmc</span></code> or <code class="docutils literal notranslate"><span class="pre">fit_svi</span></code>.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ValueError</strong> – If <code class="docutils literal notranslate"><span class="pre">loadings</span></code> is provided for <code class="docutils literal notranslate"><span class="pre">&quot;1PL&quot;</span></code> or
+    <code class="docutils literal notranslate"><span class="pre">&quot;PCM&quot;</span></code> (these fix all loadings to 1).</p></li>
+<li><p><strong>ValueError</strong> – If no latent terms would be active (both
+    <code class="docutils literal notranslate"><span class="pre">latent_fn</span></code> and <code class="docutils literal notranslate"><span class="pre">include_residuals</span></code> are empty/False).</p></li>
+<li><p><strong>ValueError</strong> – If <code class="docutils literal notranslate"><span class="pre">model_type</span></code> is not recognised.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dynamirt.fit_mcmc">
+<span class="sig-prename descclassname"><span class="pre">dynamirt.</span></span><span class="sig-name descname"><span class="pre">fit_mcmc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">model:</span> <span class="pre">~typing.Callable,</span> <span class="pre">responses:</span> <span class="pre">~jax.Array</span> <span class="pre">|</span> <span class="pre">~numpy.ndarray</span> <span class="pre">|</span> <span class="pre">~numpy.bool</span> <span class="pre">|</span> <span class="pre">~numpy.number</span> <span class="pre">|</span> <span class="pre">bool</span> <span class="pre">|</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">float</span> <span class="pre">|</span> <span class="pre">complex,</span> <span class="pre">covariates:</span> <span class="pre">~typing.Mapping[str,</span> <span class="pre">~jax.Array</span> <span class="pre">|</span> <span class="pre">~numpy.ndarray</span> <span class="pre">|</span> <span class="pre">~numpy.bool</span> <span class="pre">|</span> <span class="pre">~numpy.number</span> <span class="pre">|</span> <span class="pre">bool</span> <span class="pre">|</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">float</span> <span class="pre">|</span> <span class="pre">complex],</span> <span class="pre">kernel_class:</span> <span class="pre">type[~numpyro.infer.mcmc.MCMCKernel]</span> <span class="pre">=</span> <span class="pre">&lt;class</span> <span class="pre">'numpyro.infer.hmc.NUTS'&gt;,</span> <span class="pre">kernel_kwargs:</span> <span class="pre">dict</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">mcmc_kwargs:</span> <span class="pre">dict</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">rng_key:</span> <span class="pre">~jax.Array</span> <span class="pre">|</span> <span class="pre">~numpy.ndarray</span> <span class="pre">|</span> <span class="pre">~numpy.bool</span> <span class="pre">|</span> <span class="pre">~numpy.number</span> <span class="pre">|</span> <span class="pre">bool</span> <span class="pre">|</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">float</span> <span class="pre">|</span> <span class="pre">complex</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">DataTree</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">MCMC</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#dynamirt.fit_mcmc" title="Link to this definition">¶</a></dt>
+<dd><p>Run MCMC inference on a NumPyro model and return an xarray.DataTree.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> – A NumPyro model function with signature
+<code class="docutils literal notranslate"><span class="pre">model(responses,</span> <span class="pre">covariates,</span> <span class="pre">...)</span></code>.</p></li>
+<li><p><strong>responses</strong> – Observation matrix passed to the model.</p></li>
+<li><p><strong>covariates</strong> – Covariate mapping passed to the model.</p></li>
+<li><p><strong>kernel_class</strong> – MCMC kernel class. Defaults to <code class="docutils literal notranslate"><span class="pre">NUTS</span></code>.</p></li>
+<li><p><strong>kernel_kwargs</strong> – Extra keyword arguments forwarded to the kernel
+constructor. Defaults to an empty dict.</p></li>
+<li><p><strong>mcmc_kwargs</strong> – Keyword arguments forwarded to <code class="docutils literal notranslate"><span class="pre">MCMC</span></code>. Defaults
+to <code class="docutils literal notranslate"><span class="pre">{&quot;num_warmup&quot;:</span> <span class="pre">1500,</span> <span class="pre">&quot;num_samples&quot;:</span> <span class="pre">500,</span> <span class="pre">&quot;num_chains&quot;:</span> <span class="pre">4}</span></code>.</p></li>
+<li><p><strong>rng_key</strong> – JAX PRNG key. Defaults to <code class="docutils literal notranslate"><span class="pre">PRNGKey(0)</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple (idata, mcmc) where idata is an
+<code class="docutils literal notranslate"><span class="pre">arviz.InferenceData</span></code> object and mcmc is the fitted
+<code class="docutils literal notranslate"><span class="pre">numpyro.infer.MCMC</span></code> instance.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dynamirt.fit_svi">
+<span class="sig-prename descclassname"><span class="pre">dynamirt.</span></span><span class="sig-name descname"><span class="pre">fit_svi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">model:</span> <span class="pre">~typing.Callable,</span> <span class="pre">responses:</span> <span class="pre">~jax.Array</span> <span class="pre">|</span> <span class="pre">~numpy.ndarray</span> <span class="pre">|</span> <span class="pre">~numpy.bool</span> <span class="pre">|</span> <span class="pre">~numpy.number</span> <span class="pre">|</span> <span class="pre">bool</span> <span class="pre">|</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">float</span> <span class="pre">|</span> <span class="pre">complex,</span> <span class="pre">covariates:</span> <span class="pre">~typing.Mapping[str,</span> <span class="pre">~jax.Array</span> <span class="pre">|</span> <span class="pre">~numpy.ndarray</span> <span class="pre">|</span> <span class="pre">~numpy.bool</span> <span class="pre">|</span> <span class="pre">~numpy.number</span> <span class="pre">|</span> <span class="pre">bool</span> <span class="pre">|</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">float</span> <span class="pre">|</span> <span class="pre">complex],</span> <span class="pre">guide_class:</span> <span class="pre">type[~numpyro.infer.autoguide.AutoGuide]</span> <span class="pre">=</span> <span class="pre">&lt;class</span> <span class="pre">'numpyro.infer.autoguide.AutoNormal'&gt;,</span> <span class="pre">guide_kwargs:</span> <span class="pre">dict</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">optim_kwargs:</span> <span class="pre">dict</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">run_kwargs:</span> <span class="pre">dict</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">rng_key:</span> <span class="pre">~jax.Array</span> <span class="pre">|</span> <span class="pre">~numpy.ndarray</span> <span class="pre">|</span> <span class="pre">~numpy.bool</span> <span class="pre">|</span> <span class="pre">~numpy.number</span> <span class="pre">|</span> <span class="pre">bool</span> <span class="pre">|</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">float</span> <span class="pre">|</span> <span class="pre">complex</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">num_samples:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">500</span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">DataTree</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">AutoGuide</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">SVIRunResult</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#dynamirt.fit_svi" title="Link to this definition">¶</a></dt>
+<dd><p>Run stochastic variational inference (SVI) on a NumPyro model.</p>
+<p>After optimisation, draws posterior samples from the fitted guide and
+packages them into an xarray.DataTree.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> – A NumPyro model function with signature
+<code class="docutils literal notranslate"><span class="pre">model(responses,</span> <span class="pre">covariates,</span> <span class="pre">...)</span></code>.</p></li>
+<li><p><strong>responses</strong> – Observation matrix passed to the model.</p></li>
+<li><p><strong>covariates</strong> – Covariate mapping passed to the model.</p></li>
+<li><p><strong>guide_class</strong> – Autoguide class used to construct the variational
+family. Defaults to <code class="docutils literal notranslate"><span class="pre">AutoNormal</span></code>.</p></li>
+<li><p><strong>guide_kwargs</strong> – Extra keyword arguments forwarded to the guide
+constructor. Defaults to an empty dict.</p></li>
+<li><p><strong>optim_kwargs</strong> – Keyword arguments forwarded to the <code class="docutils literal notranslate"><span class="pre">Adam</span></code>
+optimiser. Defaults to <code class="docutils literal notranslate"><span class="pre">{&quot;step_size&quot;:</span> <span class="pre">1e-4}</span></code>.</p></li>
+<li><p><strong>run_kwargs</strong> – Keyword arguments controlling the SVI run. Must
+contain <code class="docutils literal notranslate"><span class="pre">&quot;num_steps&quot;</span></code>. Defaults to <code class="docutils literal notranslate"><span class="pre">{&quot;num_steps&quot;:</span> <span class="pre">5000}</span></code>.</p></li>
+<li><p><strong>rng_key</strong> – JAX PRNG key. Defaults to <code class="docutils literal notranslate"><span class="pre">jax.random.key(0)</span></code>.</p></li>
+<li><p><strong>num_samples</strong> – Number of posterior samples drawn from the fitted
+guide for the returned InferenceData. Defaults to 500.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple (idata, guide, svi_result) where idata is an
+<code class="docutils literal notranslate"><span class="pre">arviz.InferenceData</span></code> object, guide is the fitted autoguide
+instance, and svi_result is the <code class="docutils literal notranslate"><span class="pre">SVIRunResult</span></code> returned by
+<code class="docutils literal notranslate"><span class="pre">svi.run</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 </section>
 
@@ -506,7 +1115,81 @@ instance, and svi_result is the <code class="docutils literal notranslate"><span
 <li><a class="reference internal" href="#dynamirt.fit.fit_svi"><code class="docutils literal notranslate"><span class="pre">fit_svi()</span></code></a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#module-dynamirt">Module contents</a></li>
+<li><a class="reference internal" href="#module-dynamirt.loadings">dynamirt.loadings module</a></li>
+<li><a class="reference internal" href="#module-dynamirt.terms">dynamirt.terms module</a></li>
+<li><a class="reference internal" href="#module-dynamirt">Module contents</a><ul>
+<li><a class="reference internal" href="#dynamirt.AR1"><code class="docutils literal notranslate"><span class="pre">AR1</span></code></a><ul>
+<li><a class="reference internal" href="#dynamirt.AR1.group_by"><code class="docutils literal notranslate"><span class="pre">AR1.group_by</span></code></a></li>
+<li><a class="reference internal" href="#dynamirt.AR1.name"><code class="docutils literal notranslate"><span class="pre">AR1.name</span></code></a></li>
+<li><a class="reference internal" href="#dynamirt.AR1.order_by"><code class="docutils literal notranslate"><span class="pre">AR1.order_by</span></code></a></li>
+<li><a class="reference internal" href="#dynamirt.AR1.phi"><code class="docutils literal notranslate"><span class="pre">AR1.phi</span></code></a></li>
+<li><a class="reference internal" href="#dynamirt.AR1.scale"><code class="docutils literal notranslate"><span class="pre">AR1.scale</span></code></a></li>
+<li><a class="reference internal" href="#dynamirt.AR1.varies_over_variables"><code class="docutils literal notranslate"><span class="pre">AR1.varies_over_variables</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#dynamirt.Confirmatory"><code class="docutils literal notranslate"><span class="pre">Confirmatory()</span></code></a></li>
+<li><a class="reference internal" href="#dynamirt.ExactGP"><code class="docutils literal notranslate"><span class="pre">ExactGP</span></code></a><ul>
+<li><a class="reference internal" href="#dynamirt.ExactGP.group_by"><code class="docutils literal notranslate"><span class="pre">ExactGP.group_by</span></code></a></li>
+<li><a class="reference internal" href="#dynamirt.ExactGP.jitter"><code class="docutils literal notranslate"><span class="pre">ExactGP.jitter</span></code></a></li>
+<li><a class="reference internal" href="#dynamirt.ExactGP.kernel"><code class="docutils literal notranslate"><span class="pre">ExactGP.kernel</span></code></a></li>
+<li><a class="reference internal" href="#dynamirt.ExactGP.name"><code class="docutils literal notranslate"><span class="pre">ExactGP.name</span></code></a></li>
+<li><a class="reference internal" href="#dynamirt.ExactGP.params"><code class="docutils literal notranslate"><span class="pre">ExactGP.params</span></code></a></li>
+<li><a class="reference internal" href="#dynamirt.ExactGP.predictors"><code class="docutils literal notranslate"><span class="pre">ExactGP.predictors</span></code></a></li>
+<li><a class="reference internal" href="#dynamirt.ExactGP.varies_over_variables"><code class="docutils literal notranslate"><span class="pre">ExactGP.varies_over_variables</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#dynamirt.Fixed"><code class="docutils literal notranslate"><span class="pre">Fixed()</span></code></a></li>
+<li><a class="reference internal" href="#dynamirt.Full"><code class="docutils literal notranslate"><span class="pre">Full()</span></code></a></li>
+<li><a class="reference internal" href="#dynamirt.GRW"><code class="docutils literal notranslate"><span class="pre">GRW</span></code></a><ul>
+<li><a class="reference internal" href="#dynamirt.GRW.group_by"><code class="docutils literal notranslate"><span class="pre">GRW.group_by</span></code></a></li>
+<li><a class="reference internal" href="#dynamirt.GRW.name"><code class="docutils literal notranslate"><span class="pre">GRW.name</span></code></a></li>
+<li><a class="reference internal" href="#dynamirt.GRW.order_by"><code class="docutils literal notranslate"><span class="pre">GRW.order_by</span></code></a></li>
+<li><a class="reference internal" href="#dynamirt.GRW.scale"><code class="docutils literal notranslate"><span class="pre">GRW.scale</span></code></a></li>
+<li><a class="reference internal" href="#dynamirt.GRW.varies_over_variables"><code class="docutils literal notranslate"><span class="pre">GRW.varies_over_variables</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#dynamirt.HSGP"><code class="docutils literal notranslate"><span class="pre">HSGP</span></code></a><ul>
+<li><a class="reference internal" href="#dynamirt.HSGP.amplitude"><code class="docutils literal notranslate"><span class="pre">HSGP.amplitude</span></code></a></li>
+<li><a class="reference internal" href="#dynamirt.HSGP.ell"><code class="docutils literal notranslate"><span class="pre">HSGP.ell</span></code></a></li>
+<li><a class="reference internal" href="#dynamirt.HSGP.group_by"><code class="docutils literal notranslate"><span class="pre">HSGP.group_by</span></code></a></li>
+<li><a class="reference internal" href="#dynamirt.HSGP.kernel"><code class="docutils literal notranslate"><span class="pre">HSGP.kernel</span></code></a></li>
+<li><a class="reference internal" href="#dynamirt.HSGP.length"><code class="docutils literal notranslate"><span class="pre">HSGP.length</span></code></a></li>
+<li><a class="reference internal" href="#dynamirt.HSGP.m"><code class="docutils literal notranslate"><span class="pre">HSGP.m</span></code></a></li>
+<li><a class="reference internal" href="#dynamirt.HSGP.name"><code class="docutils literal notranslate"><span class="pre">HSGP.name</span></code></a></li>
+<li><a class="reference internal" href="#dynamirt.HSGP.nu"><code class="docutils literal notranslate"><span class="pre">HSGP.nu</span></code></a></li>
+<li><a class="reference internal" href="#dynamirt.HSGP.predictors"><code class="docutils literal notranslate"><span class="pre">HSGP.predictors</span></code></a></li>
+<li><a class="reference internal" href="#dynamirt.HSGP.varies_over_variables"><code class="docutils literal notranslate"><span class="pre">HSGP.varies_over_variables</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#dynamirt.Linear"><code class="docutils literal notranslate"><span class="pre">Linear</span></code></a><ul>
+<li><a class="reference internal" href="#dynamirt.Linear.coef"><code class="docutils literal notranslate"><span class="pre">Linear.coef</span></code></a></li>
+<li><a class="reference internal" href="#dynamirt.Linear.constraint"><code class="docutils literal notranslate"><span class="pre">Linear.constraint</span></code></a></li>
+<li><a class="reference internal" href="#dynamirt.Linear.corr"><code class="docutils literal notranslate"><span class="pre">Linear.corr</span></code></a></li>
+<li><a class="reference internal" href="#dynamirt.Linear.group_by"><code class="docutils literal notranslate"><span class="pre">Linear.group_by</span></code></a></li>
+<li><a class="reference internal" href="#dynamirt.Linear.name"><code class="docutils literal notranslate"><span class="pre">Linear.name</span></code></a></li>
+<li><a class="reference internal" href="#dynamirt.Linear.predictors"><code class="docutils literal notranslate"><span class="pre">Linear.predictors</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#dynamirt.Param"><code class="docutils literal notranslate"><span class="pre">Param</span></code></a><ul>
+<li><a class="reference internal" href="#dynamirt.Param.apply_partial_pooling"><code class="docutils literal notranslate"><span class="pre">Param.apply_partial_pooling()</span></code></a></li>
+<li><a class="reference internal" href="#dynamirt.Param.by_group"><code class="docutils literal notranslate"><span class="pre">Param.by_group</span></code></a></li>
+<li><a class="reference internal" href="#dynamirt.Param.by_variable"><code class="docutils literal notranslate"><span class="pre">Param.by_variable</span></code></a></li>
+<li><a class="reference internal" href="#dynamirt.Param.prior"><code class="docutils literal notranslate"><span class="pre">Param.prior</span></code></a></li>
+<li><a class="reference internal" href="#dynamirt.Param.sample_raw"><code class="docutils literal notranslate"><span class="pre">Param.sample_raw()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#dynamirt.Pool"><code class="docutils literal notranslate"><span class="pre">Pool</span></code></a><ul>
+<li><a class="reference internal" href="#dynamirt.Pool.loc"><code class="docutils literal notranslate"><span class="pre">Pool.loc</span></code></a></li>
+<li><a class="reference internal" href="#dynamirt.Pool.scale"><code class="docutils literal notranslate"><span class="pre">Pool.scale</span></code></a></li>
+<li><a class="reference internal" href="#dynamirt.Pool.transform"><code class="docutils literal notranslate"><span class="pre">Pool.transform</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#dynamirt.Sparsity"><code class="docutils literal notranslate"><span class="pre">Sparsity()</span></code></a></li>
+<li><a class="reference internal" href="#dynamirt.dynamirt"><code class="docutils literal notranslate"><span class="pre">dynamirt()</span></code></a></li>
+<li><a class="reference internal" href="#dynamirt.fit_mcmc"><code class="docutils literal notranslate"><span class="pre">fit_mcmc()</span></code></a></li>
+<li><a class="reference internal" href="#dynamirt.fit_svi"><code class="docutils literal notranslate"><span class="pre">fit_svi()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
