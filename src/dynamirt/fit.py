@@ -96,7 +96,7 @@ def fit_svi(
     """
 
     guide_kwargs = guide_kwargs or {}
-    optim_kwargs = optim_kwargs or {"step_size": 1e-4}
+    optim_kwargs = optim_kwargs or {"step_size": 1e-3}
     run_kwargs = run_kwargs or {"num_steps": 5000}
     rng_key = rng_key if rng_key is not None else jax.random.key(0)
 
