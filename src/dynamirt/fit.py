@@ -1,24 +1,48 @@
-from numpyro.infer import MCMC, NUTS
+from typing import Callable, Mapping
 
-from numpyro.infer import SVI, Trace_ELBO
-from numpyro.infer.autoguide import AutoNormal
-from numpyro.optim import Adam
 import jax
+from jax.typing import ArrayLike
+
+from numpyro.infer import MCMC, NUTS, SVI, Trace_ELBO
+from numpyro.infer.autoguide import AutoGuide, AutoNormal
+from numpyro.infer.svi import SVIRunResult
+from numpyro.infer.mcmc import MCMCKernel
+from numpyro.optim import Adam
 
 import arviz as az
 
 def fit_mcmc(
-    model,
-    responses,
-    covariates,
-    kernel_class=NUTS,
-    kernel_kwargs=None,
-    mcmc_kwargs=None,
-    rng_key=None,
-    ):
+    model: Callable,
+    responses: ArrayLike,
+    covariates: Mapping[str, ArrayLike],
+    kernel_class: type[MCMCKernel]=NUTS,
+    kernel_kwargs: dict | None = None,
+    mcmc_kwargs: dict | None = None,
+    rng_key: ArrayLike | None = None,
+    ) -> tuple[az.InferenceData, MCMC]:
 
+    """Run MCMC inference on a NumPyro model and return an ArviZ InferenceData.
+
+    Args:
+        model: A NumPyro model function with signature
+            ``model(responses, covariates, ...)``.
+        responses: Observation matrix passed to the model.
+        covariates: Covariate mapping passed to the model.
+        kernel_class: MCMC kernel class. Defaults to ``NUTS``.
+        kernel_kwargs: Extra keyword arguments forwarded to the kernel
+            constructor. Defaults to an empty dict.
+        mcmc_kwargs: Keyword arguments forwarded to ``MCMC``. Defaults
+            to ``{"num_warmup": 1500, "num_samples": 500, "num_chains": 4}``.
+        rng_key: JAX PRNG key. Defaults to ``PRNGKey(0)``.
+
+    Returns:
+        A tuple (idata, mcmc) where idata is an
+        ``arviz.InferenceData`` object and mcmc is the fitted
+        ``numpyro.infer.MCMC`` instance.
+    """
+    
     kernel_kwargs = kernel_kwargs or {}
-    mcmc_kwargs = mcmc_kwargs or {"num_warmup": 1500, "num_samples": 500}
+    mcmc_kwargs = mcmc_kwargs or {"num_warmup": 1500, "num_samples": 500, "num_chains": 4}
     rng_key = rng_key if rng_key is not None else jax.random.PRNGKey(0)
 
     mcmc = MCMC(kernel_class(model, **kernel_kwargs), **mcmc_kwargs)
@@ -30,16 +54,45 @@ def fit_mcmc(
 
 
 def fit_svi(
-    model,
-    responses,
-    covariates,
-    guide_class=AutoNormal,
-    guide_kwargs=None,
-    optim_kwargs=None,
-    run_kwargs=None,
-    rng_key=None,
+    model: Callable,
+    responses: ArrayLike,
+    covariates: Mapping[str, ArrayLike],
+    guide_class: type[AutoGuide] = AutoNormal,
+    guide_kwargs: dict | None = None,
+    optim_kwargs: dict | None = None,
+    run_kwargs: dict | None = None,
+    rng_key: ArrayLike | None = None,
     num_samples: int=500
-    ):
+    ) -> tuple[az.InferenceData, AutoGuide, SVIRunResult]:
+
+    """Run stochastic variational inference (SVI) on a NumPyro model.
+
+    After optimisation, draws posterior samples from the fitted guide and
+    packages them into an ArviZ InferenceData.
+
+    Args:
+        model: A NumPyro model function with signature
+            ``model(responses, covariates, ...)``.
+        responses: Observation matrix passed to the model.
+        covariates: Covariate mapping passed to the model.
+        guide_class: Autoguide class used to construct the variational
+            family. Defaults to ``AutoNormal``.
+        guide_kwargs: Extra keyword arguments forwarded to the guide
+            constructor. Defaults to an empty dict.
+        optim_kwargs: Keyword arguments forwarded to the ``Adam``
+            optimiser. Defaults to ``{"step_size": 1e-4}``.
+        run_kwargs: Keyword arguments controlling the SVI run. Must
+            contain ``"num_steps"``. Defaults to ``{"num_steps": 5000}``.
+        rng_key: JAX PRNG key. Defaults to ``jax.random.key(0)``.
+        num_samples: Number of posterior samples drawn from the fitted
+            guide for the returned InferenceData. Defaults to 500.
+
+    Returns:
+        A tuple (idata, guide, svi_result) where idata is an
+        ``arviz.InferenceData`` object, guide is the fitted autoguide
+        instance, and svi_result is the ``SVIRunResult`` returned by
+        ``svi.run``.
+    """
 
     guide_kwargs = guide_kwargs or {}
     optim_kwargs = optim_kwargs or {"step_size": 1e-4}

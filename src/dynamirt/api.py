@@ -27,25 +27,44 @@ def dynamirt(
     Build a MIRT model with optionally time evolving latent traits.
 
     Args:
-        model_type: IRT family to use. Dichotomous: "1PL"/"2PL"/"3PL"/"4PL".
-            Polytomous: "GRM"/"PCM"/"GPCM".
-        n_latent: Dimensionality of the latent space.
-        loadings: Loading matrix factory (e.g. `Fixed()`, `Unconstrained()`).
-            Defaults to `Unconstrained()`, except for "1PL"/"PCM" where it's
-            forced to `Fixed()`.
-        latent_fn: Latent regression terms (e.g. covariate effects on theta).
-            If omitted, a i.i.d residual latent term is added by default (see `include_residuals`).
-        DIF: Terms added to the full-rank (item-level) regression to model
-            differential item functioning.
-        include_residuals: Whether to add a residual latent term. Defaults
-            to True only when `latent_fn` is not provided.
-        corr: If including residuals, whether to estimate correlations
-            between latent variables' residuals.
-        model_type_kwargs: Extra keyword arguments passed to the family
-            constructor for `model_type`.
-
+        model_type: IRT response family. Dichotomous options:
+            ``"1PL"``, ``"2PL"``, ``"3PL"``, ``"4PL"``. Polytomous
+            options: ``"GRM"`` (graded response model),
+            ``"PCM"`` (partial credit model),
+            ``"GPCM"`` (generalised partial credit model).
+            Defaults to ``"2PL"``.
+        n_latent: Dimensionality of the latent trait space. Defaults
+            to 1.
+        loadings: Loading-matrix factory (e.g. ``Fixed()``,
+            ``Full()``, ``Confirmatory(Q)``). Defaults to ``Full()``
+            (unconstrained), except for ``"1PL"`` and ``"PCM"`` where
+            it is forced to ``Fixed()``.
+        latent_fn: Sequence of latent-regression term callables (e.g.
+            time-series terms, covariate effects on theta). If None
+            and ``include_residuals`` is not explicitly False, an
+            i.i.d. residual term is added automatically.
+        DIF: Sequence of full-rank regression term callables added
+            alongside the item intercepts to model differential item
+            functioning. Defaults to None.
+        include_residuals: Whether to append an i.i.d. residual latent
+            term. Defaults to True when ``latent_fn`` is None,
+            False otherwise.
+        corr: If True and residuals are included, an LKJ-Cholesky
+            correlation structure is estimated across latent
+            dimensions. Defaults to True.
+        model_type_kwargs: Extra keyword arguments forwarded to the
+            IRT family constructor for `model_type`.
+        
     Returns:
-        A numpyro model function.
+        A numpyro function with signature ``model(responses, covariates, ...)``
+        ready for use with ``fit_mcmc`` or ``fit_svi``.
+        
+    Raises:
+        ValueError: If ``loadings`` is provided for ``"1PL"`` or
+            ``"PCM"`` (these fix all loadings to 1).
+        ValueError: If no latent terms would be active (both
+            ``latent_fn`` and ``include_residuals`` are empty/False).
+        ValueError: If ``model_type`` is not recognised.
     """
     
     # ----------------- validation and setting defaults -----------------
