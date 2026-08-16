@@ -10,6 +10,7 @@ from numpyro.infer.mcmc import MCMCKernel
 from numpyro.optim import Adam
 
 import arviz as az
+from xarray import DataTree
 
 def fit_mcmc(
     model: Callable,
@@ -19,9 +20,9 @@ def fit_mcmc(
     kernel_kwargs: dict | None = None,
     mcmc_kwargs: dict | None = None,
     rng_key: ArrayLike | None = None,
-    ) -> tuple[az.InferenceData, MCMC]:
+    ) -> tuple[DataTree, MCMC]:
 
-    """Run MCMC inference on a NumPyro model and return an ArviZ InferenceData.
+    """Run MCMC inference on a NumPyro model and return an xarray.DataTree.
 
     Args:
         model: A NumPyro model function with signature
@@ -63,12 +64,12 @@ def fit_svi(
     run_kwargs: dict | None = None,
     rng_key: ArrayLike | None = None,
     num_samples: int=500
-    ) -> tuple[az.InferenceData, AutoGuide, SVIRunResult]:
+    ) -> tuple[DataTree, AutoGuide, SVIRunResult]:
 
     """Run stochastic variational inference (SVI) on a NumPyro model.
 
     After optimisation, draws posterior samples from the fitted guide and
-    packages them into an ArviZ InferenceData.
+    packages them into an xarray.DataTree.
 
     Args:
         model: A NumPyro model function with signature
