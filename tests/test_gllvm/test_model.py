@@ -25,9 +25,10 @@ import numpy as np
 import pytest
 
 import jax
-jax.config.update("jax_enable_x64", True) # necessary for ExactGP underflow
 import jax.numpy as jnp
 from jax import random
+
+jax.config.update("jax_enable_x64", True) # necessary for ExactGP underflow
 
 import numpyro.distributions as dist
 from numpyro.infer import SVI, Trace_ELBO, Predictive
