@@ -38,8 +38,7 @@ from numpyro.optim import Adam
 
 from tinygp import kernels
 
-# adjust to your layout
-from dynamirt.gllvm import gllvm
+from dynamirt.gllvm.model import gllvm
 from dynamirt.gllvm.families import Gaussian
 from dynamirt.gllvm.parameters import Param
 from dynamirt.gllvm.terms.linear import Linear

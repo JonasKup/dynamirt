@@ -1,5 +1,5 @@
-from .gllvm import gllvm
-from .gllvm import Linear
+from .gllvm.model import gllvm
+from .gllvm.terms.linear import Linear
 
 from .gllvm.loadings import Full, Fixed
 
