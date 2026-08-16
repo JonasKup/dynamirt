@@ -17,7 +17,7 @@ def _dichotomous(
     upper_asymptote_prior: dist.Distribution = None
     ):
     
-    """Compute likelihood for 3PL and 4PL models"""
+    """Compute likelihood for 1PL, 2PL, 3PL, 4PL models"""
     
     lower_asymptote_prior = dist.Beta(2, 8) if lower_asymptote_prior is None else lower_asymptote_prior
     upper_asymptote_prior = dist.Beta(8, 2) if upper_asymptote_prior is None else upper_asymptote_prior
@@ -53,6 +53,8 @@ def _polytomous(
     prior=None, 
     loc_prior=None, 
     gap_prior=None):
+    
+    """Compute likelihood for GRM, PCM, GPCM models"""
     
     prior = dist.Normal(0, 1) if prior is None else prior
     loc_prior = dist.Normal(0, 3) if loc_prior is None else loc_prior

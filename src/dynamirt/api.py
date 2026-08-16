@@ -3,7 +3,7 @@ from .gllvm import Linear
 
 from .gllvm.loadings import Full, Fixed
 
-from .families import _dichotomous, _polytomous
+from ._families import _dichotomous, _polytomous
 
 from functools import partial
 
@@ -45,7 +45,7 @@ def dynamirt(
             constructor for `model_type`.
 
     Returns:
-        Callable: A numpyro model function.
+        A numpyro model function.
     """
     
     # ----------------- validation and setting defaults -----------------
