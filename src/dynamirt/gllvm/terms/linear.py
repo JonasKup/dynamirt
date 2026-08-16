@@ -10,7 +10,6 @@ import numpyro.distributions as dist
 import jax.numpy as jnp
 
 # To do: add Custom term?
-# Update Linear docstring
 # remove corr = both path
 
 @dataclass(frozen=True)
@@ -20,8 +19,7 @@ class Linear:
 
     Contributes an array of shape (n_obs, n_target) where n_target is the
     number of response variables (full-rank predictor), the number of
-    latent dimensions (reduced-rank predictor), or 1 (broadcast) when
-    ``varies_over_variables`` is False.
+    latent dimensions (reduced-rank predictor).
 
     Attributes:
         name: Sample-site prefix. The assembled coefficient tensor is
