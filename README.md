@@ -9,6 +9,74 @@ Whenever we measure sets of items for multiple respondents, a common assumption 
   </tr>
 </table>
 
+## Quickstart
+
+### Static 2-PL MIRT model
+
+```python
+from dynamirt.api import dynamirt
+from dynamirt.fit import fit_mcmc
+from dynamirt.loadings import Confirmatory
+
+model = dynamirt(
+    model_type="2PL",
+    n_latent=2,
+    loadings=Confirmatory(Q, positive_anchors=Q),
+)
+
+covariates = {}
+idata, mcmc = fit_mcmc(model, responses, covariates)
+```
+
+### Longitudinal 2-PL MIRT model with HSGPs
+
+```python
+from dynamirt.api import dynamirt
+from dynamirt.fit import fit_svi
+from dynamirt.loadings import Sparsity
+from dynamirt.terms import Linear, HSGP
+
+covariates = {
+  "respondent_id": ...,
+  "time": ...} 
+
+intercept = Linear("respondent_mean", "one_", group_by="respondent_id")
+trajectory = HSGP(
+  name="trajectory", 
+  predictors="time", 
+  group_by="respondent_id", 
+  kernel="Matern",
+  ell= 1.5, # assumes time is scaled and centered
+  m=30,     # number of basis functions
+  nu=3/2    # smoothness of the Matérn kernel
+)
+
+model = dynamirt(
+    model_type="2PL",
+    n_latent=2,
+    loadings=Sparsity(),
+    latent_fn=[intercept, trajectory]
+)
+
+idata, guide, svi_result = fit_svi(model, responses, covariates)
+```
+
 Links to docs etc
 
-Links to dependencies
+## Built with
+- [NumPyro](https://num.pyro.ai/)
+- [JAX] (https://docs.jax.dev/en/latest/index.html)
+- [ArviZ] (https://www.arviz.org/en/latest/)
+- [tinygp] (https://tinygp.readthedocs.io/en/stable/)
+
+## Other IRT and latent variable software
+
+### R
+- [mirt](https://github.com/philchalmers/mirt) — Multidimensional item response theory in R
+- [emIRT](https://github.com/kosukeimai/emIRT) — EM Algorithms for Estimating Item Response Theory Models (including ideal point estimation over time)
+- [gllvm](https://github.com/JenniNiku/gllvm) — Generalized linear latent variable models
+- [Hmsc](https://github.com/hmsc-r/HMSC) — Hierarchical Modelling of Species Communities
+
+### Python
+- [py-irt](https://github.com/nd-ball/py-irt) — Bayesian IRT models in PyTorch
+- [girth](https://github.com/eribean/girth) — Classical IRT parameter estimation (MML and joint maximum likelihood)
