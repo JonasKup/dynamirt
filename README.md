@@ -65,9 +65,9 @@ Links to docs etc
 
 ## Built with
 - [NumPyro](https://num.pyro.ai/)
-- [JAX] (https://docs.jax.dev/en/latest/index.html)
-- [ArviZ] (https://www.arviz.org/en/latest/)
-- [tinygp] (https://tinygp.readthedocs.io/en/stable/)
+- [JAX](https://docs.jax.dev/en/latest/index.html)
+- [ArviZ](https://www.arviz.org/en/latest/)
+- [tinygp](https://tinygp.readthedocs.io/en/stable/)
 
 ## Other IRT and latent variable software
 
@@ -78,5 +78,5 @@ Links to docs etc
 - [Hmsc](https://github.com/hmsc-r/HMSC) — Hierarchical Modelling of Species Communities
 
 ### Python
-- [py-irt](https://github.com/nd-ball/py-irt) — Bayesian IRT models in PyTorch
-- [girth](https://github.com/eribean/girth) — Classical IRT parameter estimation (MML and joint maximum likelihood)
+- [py-irt](https://github.com/nd-ball/py-irt) — A Scalable Item Response Theory Library for Python
+- [girth](https://github.com/eribean/girth) — A python package for estimating item response theory (IRT) parameters
