@@ -18,7 +18,7 @@ class Linear:
     """Linear term ``X @ coef`` for a gllvm regression.
 
     Contributes an array of shape (n_obs, n_target) where n_target is the
-    number of response variables (full-rank predictor), the number of
+    number of response variables (full-rank predictor) or the number of
     latent dimensions (reduced-rank predictor).
 
     Attributes:
