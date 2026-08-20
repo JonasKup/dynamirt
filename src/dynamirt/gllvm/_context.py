@@ -23,6 +23,11 @@ class _Context:
         n_obs: Number of observation rows.
         n_var: Number of response variables (columns in responses).
         n_latent: Dimensionality of the latent space.
+        is_predictive: Whether the model is currently predicting for new data
+        train_covariates: Covariates used for fitting the model. 
+            Only required when using Predictive with ExactGPs.
+        train_obs: Number of observations when fitting the model.
+            Only required when using Predictive with ExactGPs.
     """
     
     responses: ArrayLike
@@ -31,16 +36,26 @@ class _Context:
     n_var: int
     n_latent: int
     
-    def _factorize(self, key):
+    is_predictive: bool
+    train_covariates: Mapping[str, ArrayLike]
+    train_obs: int
+    
+    def _factorize(self, key, use_train=False):
         """interpret covariate as index column for grouping"""
+        covariates = self.train_covariates if use_train else self.covariates
+        n_obs = self.train_obs if use_train else self.n_obs
+        
         if key is None:
-            return np.zeros(self.n_obs, int), 1
-        codes, idx = np.unique(np.asarray(self.covariates[key]).ravel(), return_inverse=True)
+            return np.zeros(n_obs, int), 1
+        codes, idx = np.unique(np.asarray(covariates[key]).ravel(), return_inverse=True)
         return idx, codes.size
 
-    def _design(self, predictors):
+    def _design(self, predictors, use_train=False):
         """stack multiple covariates into single array if multiple were given. 
         Broadcast scalar values to correct length."""
+        covariates = self.train_covariates if use_train else self.covariates
+        n_obs = self.train_obs if use_train else self.n_obs
+
         keys = [predictors] if isinstance(predictors, str) else list(predictors)
-        cols = [np.broadcast_to(np.asarray(self.covariates[k]).ravel(), (self.n_obs,)) for k in keys]
+        cols = [np.broadcast_to(np.asarray(covariates[k]).ravel(), (n_obs,)) for k in keys]
         return np.stack(cols, axis=-1)
