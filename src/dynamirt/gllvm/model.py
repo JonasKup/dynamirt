@@ -81,6 +81,13 @@ def gllvm(
                   "one_": np.array([1.0]),  # for intercepts
                   "row_": np.arange(n_obs)} # stand-in for ID column in scenarios w/o repeated measures where n_obs == n_site/respondent
         
+    if train_covariates is not None:
+        train_covariates = {
+            **train_covariates,
+            "one_": np.array([1.0]),
+            "row_": np.arange(train_obs),
+        }
+    
     is_predictive = True if responses is None else False
     ctx = _Context(
         responses,
