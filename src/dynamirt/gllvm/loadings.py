@@ -104,6 +104,8 @@ def Sparsity(tau0=1.0, slab_scale: float=1.0, slab_df: float=4.0) -> Callable:
     """
     Loading matrix factory with regularized horseshoe sparsity prior.
     
+    !Experimental!
+    
     Applies the regularised horseshoe prior of Piironen & Vehtari (2017)
     to the loading matrix, encouraging most loadings toward zero while
     allowing a sparse subset to remain large.
