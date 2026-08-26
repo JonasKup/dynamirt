@@ -24,7 +24,7 @@ def Fixed() -> Callable:
 
 def Confirmatory(
     Q: ArrayLike, 
-    positive_anchors: ArrayLike = None, 
+    positive: ArrayLike = None, 
     free_prior: dist.Distribution | None = None,
     positive_prior: dist.Distribution | None = None
     ) -> Callable:
@@ -52,8 +52,8 @@ def Confirmatory(
     positive_prior = dist.LogNormal(0, 0.5) if positive_prior is None else positive_prior
     
     rows, cols = np.nonzero(np.asarray(Q))
-    pos = (np.zeros(rows.size, bool) if positive_anchors is None
-           else np.asarray(positive_anchors)[rows, cols].astype(bool))
+    pos = (np.zeros(rows.size, bool) if positive is None
+           else np.asarray(positive)[rows, cols].astype(bool))
     free = ~pos
     n_free, n_pos = int(free.sum()), int(pos.sum())
 
