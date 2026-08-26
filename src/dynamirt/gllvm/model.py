@@ -104,13 +104,18 @@ def gllvm(
     eta = jnp.zeros((n_obs, n_var))
     if full_rank_regression is not None:
         for term in full_rank_regression:
-            eta += term(ctx, n_var) # (n_obs, n_var)
+            contribution = term(ctx, n_var) # (n_obs, n_var)
+            eta += contribution
+            numpyro.deterministic(f"{term.name}_eta", contribution) # makes term need to carry a name field
+
     
     # reduced-rank regression
     u = jnp.zeros((n_obs, n_latent))
     if latent_regression is not None:
         for term in latent_regression:
-            u += term(ctx, n_latent) # (n_obs, n_latent)
+            contribution = term(ctx, n_latent) # (n_obs, n_latent)
+            u += contribution
+            numpyro.deterministic(f"{term.name}_latent", contribution) # makes term need to carry a name field
     
     with numpyro.handlers.scope(prefix="loadings", divider="."):
         loadings_matrix = loadings(ctx) # (n_var, n_latent)
