@@ -82,6 +82,6 @@ class Pool:
             constrain the result to be positive). Defaults to the
             identity transform.
     """
-    loc: Param = Param(dist.Normal(0.0, 1.0))
-    scale: Param = Param(dist.HalfNormal(0.5))
+    loc: Param = Param(dist.Normal(0.0, 1.0), by_variable="free")
+    scale: Param = Param(dist.HalfNormal(0.5), by_variable="free")
     transform: dist.transforms.Transform = field(default_factory=dist.transforms.IdentityTransform)
