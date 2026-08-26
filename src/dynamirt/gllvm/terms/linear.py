@@ -25,6 +25,7 @@ class Linear:
         name: Sample-site prefix. The assembled coefficient tensor is
             stored as a deterministic site under this name.
         predictors: Covariate name or sequence of names to regress on.
+            Defaults to ``"one_"`` which specifies an intercept.
         group_by: Optional covariate name giving a grouping factor. A
             separate coefficient vector is drawn per level. Defaults to
             None (single level).
@@ -41,7 +42,7 @@ class Linear:
     """
     
     name: str
-    predictors: str | Sequence[str]
+    predictors: str | Sequence[str] = "one_"
     group_by: str | None = None
     
     # todo: sum to zero
