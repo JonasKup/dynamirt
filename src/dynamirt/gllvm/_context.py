@@ -36,9 +36,9 @@ class _Context:
     n_var: int
     n_latent: int
     
-    is_predictive: bool
-    train_covariates: Mapping[str, ArrayLike]
-    train_obs: int
+    is_predictive: bool = False
+    train_covariates: Mapping[str, ArrayLike] | None = None
+    train_obs: int | None = None
     
     def _factorize(self, key, use_train=False):
         """interpret covariate as index column for grouping"""
