@@ -7,10 +7,9 @@ markers = ["slow: fits models using SVI"]
 
 [project]
 name = "dynamirt"
-version = "0.0.1"
+version = "0.1.0"
 authors = [
   { name="Jonas Kupschus", email="jonas.kupschus@rwth-aachen.de" },
-  { name="Andreas Schuppert", email="aschuppert@ukaachen.de" },
 ]
 description = "Static and Longitudinal Multidimensional Item Response Theory."
 readme = "README.md"
@@ -19,8 +18,10 @@ dependencies = [
     "numpy",
     "jax",
     "numpyro",
-    "arviz",
-    "matplotlib"
+    "arviz>=1",
+    "matplotlib",
+    "tinygp",
+    "xarray>=2024.10.0",
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
