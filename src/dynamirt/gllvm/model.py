@@ -88,7 +88,8 @@ def gllvm(
             "row_": np.arange(train_obs),
         }
     
-    is_predictive = True if responses is None else False
+    is_predictive = train_covariates is not None
+    
     ctx = _Context(
         responses,
         covariates,
