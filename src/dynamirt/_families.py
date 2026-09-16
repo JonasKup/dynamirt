@@ -3,6 +3,7 @@ from .gllvm.families import Bernoulli
 
 import jax
 import jax.numpy as jnp
+import numpy as np
 from jax.typing import ArrayLike
 
 import numpyro
@@ -44,7 +45,6 @@ def _dichotomous(
 
     return family
 
-# This might be flipping default sign of the intercept.
 # prior naming needs to be cleared up.
 # potentially separate GRM and GPCM
 def _polytomous(
@@ -54,14 +54,54 @@ def _polytomous(
     loc_prior=None, 
     gap_prior=None):
     
-    """Compute likelihood for GRM, PCM, GPCM models"""
+    """Compute likelihood for GRM, PCM, GPCM models with a shared or per-item category count.
+
+    Per-item counts use compact raw parameters and zero-padded deterministic
+    cutpoints/steps; only the first n_cat[j] - 1 entries of item j are valid.
+    """
     
     prior = dist.Normal(0, 1) if prior is None else prior
     loc_prior = dist.Normal(0, 3) if loc_prior is None else loc_prior
     gap_prior = dist.Normal(0, 0.5) if gap_prior is None else gap_prior
 
+    counts = np.asarray(n_cat)
+    if counts.ndim:
+        max_cat = int(counts.max())
+        valid = np.arange(max_cat - 1) < counts[:, None] - 1
+        item, threshold = np.nonzero(valid)
+        categories = jnp.arange(max_cat)
+
     def family(eta, ctx):
-        
+        if counts.ndim:
+            if model_type == "GRM":
+                base = dist.Normal(
+                    jnp.where(threshold == 0, loc_prior.loc, gap_prior.loc),
+                    jnp.where(threshold == 0, loc_prior.scale, gap_prior.scale),
+                )
+                raw = numpyro.sample("cutpoints_raw", base.to_event(1))
+                padded = jnp.zeros(valid.shape).at[item, threshold].set(raw)
+                c = OrderedTransform()(padded)
+                numpyro.deterministic("cutpoints", jnp.where(valid, c, 0.0))
+                logits = dist.OrderedLogistic(eta, c).logits
+                # The final valid category includes the entire upper tail.
+                last = c[jnp.arange(ctx.n_var), counts - 2]
+                logits = jnp.where(
+                    categories == counts[:, None] - 1,
+                    jax.nn.log_sigmoid(eta - last)[..., None],
+                    logits,
+                )
+            else:
+                raw = numpyro.sample("steps_raw", prior.expand((len(item),)).to_event(1))
+                d = numpyro.deterministic(
+                    "steps", jnp.zeros(valid.shape).at[item, threshold].set(raw)
+                )
+                logits = jnp.cumsum(
+                    jnp.pad(eta[..., None] - d, ((0, 0), (0, 0), (1, 0))), axis=-1
+                )
+            return dist.CategoricalLogits(
+                jnp.where(categories < counts[:, None], logits, -jnp.inf)
+            )
+
         if model_type == "GRM":
             base = dist.Normal(
                 jnp.concatenate([jnp.full((ctx.n_var, 1), loc_prior.loc),

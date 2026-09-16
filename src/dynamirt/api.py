@@ -19,7 +19,7 @@ def dynamirt(
     latent_fn: Sequence[Callable] | None =None,
     DIF: Sequence[Callable] | None =None,
     include_residuals: bool | None =None,
-    corr: bool = True,
+    corr: bool = False,
     model_type_kwargs: dict | None =None
     ) -> Callable:
     
@@ -51,9 +51,11 @@ def dynamirt(
             False otherwise.
         corr: If True and residuals are included, an LKJ-Cholesky
             correlation structure is estimated across latent
-            dimensions. Defaults to True.
+            dimensions. Defaults to False.
         model_type_kwargs: Extra keyword arguments forwarded to the
-            IRT family constructor for `model_type`.
+            IRT family constructor for `model_type`. For polytomous models,
+            ``n_cat`` is an integer or a sequence of counts in item-column
+            order.
         
     Returns:
         A numpyro function with signature ``model(responses, covariates, ...)``
