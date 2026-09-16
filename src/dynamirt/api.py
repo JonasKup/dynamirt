@@ -113,5 +113,15 @@ def dynamirt(
         family=family_fn,
         latent_site_name="theta"
     )
+
+    # Semantic axes for public outputs; internal/custom sites use ArviZ defaults.
+    model._dynamirt_dims = {
+        "theta": ["obs", "latent"],
+        "loadings": ["item", "latent"],
+        "Y": ["obs", "item"],
+        **{f"{term.name}_latent": ["obs", "latent"] for term in latent_contribution},
+        **{f"{term.name}_eta": ["obs", "item"] for term in full_rank},
+    }
+    model._dynamirt_n_latent = n_latent
     
     return model

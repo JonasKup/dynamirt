@@ -1,17 +1,106 @@
-from typing import Callable, Mapping
+from dataclasses import dataclass, field
+from numbers import Integral
+from typing import Any, Callable, Mapping
+
+import arviz as az
+import numpy as np
+import xarray as xr
 
 import jax
 from jax.typing import ArrayLike
 
 from numpyro.infer import MCMC, NUTS, SVI, Trace_ELBO
 from numpyro.infer.autoguide import AutoGuide, AutoNormal
-from numpyro.infer.svi import SVIRunResult
 from numpyro.infer.mcmc import MCMCKernel
+from numpyro.infer.svi import SVIRunResult
 from numpyro.optim import Adam
 from numpyro.handlers import block
 
-import arviz as az
-from xarray import DataTree
+
+@dataclass
+class SVIState:
+    """Fitted SVI state; the guide remains available through ``svi.guide``."""
+
+    svi: SVI = field(repr=False)
+    result: SVIRunResult = field(repr=False)
+
+
+@dataclass
+class FitResult:
+    """Result returned by ``fit_mcmc`` or ``fit_svi``, with ArviZ conversion."""
+
+    inference: MCMC | SVIState = field(repr=False)
+    model: Callable = field(repr=False)
+    responses: Any = field(repr=False)
+    covariates: dict[str, Any] = field(repr=False)
+    dims: dict[str, list[str]] = field(default_factory=dict)
+    coords: dict[str, Any] = field(default_factory=dict)
+
+    def to_idata(self, *, num_samples: int | None = None) -> xr.DataTree:
+        """Convert available posterior results to labeled ArviZ 1.x data.
+
+        Args:
+            num_samples: Number of posterior draws for SVI. Defaults to 500.
+                Leave as None for MCMC to retain all existing draws. Default None.
+
+        Returns:
+            An xarray.DataTree with named dimensions and observation-level
+            covariates attached as coordinates.
+
+        Raises:
+            ValueError: If num_samples is supplied for MCMC, is not a positive
+                integer for SVI, or a covariate name conflicts with an existing
+                variable or dimension.
+        """
+        kwargs = dict(coords=self.coords, dims=self.dims)
+        if isinstance(self.inference, MCMC):
+            if num_samples is not None:
+                raise ValueError("num_samples is only supported for SVI conversion")
+            idata = az.from_numpyro(self.inference, pred_dims=self.dims, **kwargs)
+        elif isinstance(self.inference, SVIState):
+            num_samples = 500 if num_samples is None else num_samples
+
+            idata = az.from_numpyro_svi(
+                self.inference.svi,
+                svi_result=self.inference.result,
+                num_samples=int(num_samples),
+                model_args=(self.responses, self.covariates),
+                pred_dims=self.dims,
+                **kwargs,
+            )
+        else:
+            raise TypeError("inference must be an MCMC object or SVIState")
+
+        observation_coords = {
+            name: ("obs", np.asarray(values))
+            for name, values in self.covariates.items()
+            if np.shape(values) == (np.shape(self.responses)[0],)
+        }
+        for name, group in list(idata.children.items()):
+            if "obs" in group.dims:
+                collisions = set(observation_coords) & (set(group.variables) | set(group.dims))
+                if collisions:
+                    raise ValueError(
+                        f"Covariate names conflict with analysis variables/dimensions: {sorted(collisions)}"
+                    )
+                idata[name] = group.to_dataset().assign_coords(observation_coords)
+        return idata
+
+
+def _make_result(inference, model, responses, covariates, dims=None, coords=None):
+    """Prepare model-owned metadata once, without inferring meanings by size."""
+    site_dims = {name: list(axes) for name, axes in getattr(model, "_dynamirt_dims", {}).items()}
+    labels = {}
+    if site_dims:
+        n_obs, n_items = np.shape(responses)
+        labels = {
+            "obs": np.arange(n_obs), "item": np.arange(n_items),
+            "latent": np.arange(model._dynamirt_n_latent),
+        }
+    site_dims.update({name: list(axes) for name, axes in (dims or {}).items()})
+    labels.update(coords or {})
+    return FitResult(inference, model, responses, dict(covariates), site_dims, labels)
+
 
 def fit_mcmc(
     model: Callable,
@@ -21,10 +110,13 @@ def fit_mcmc(
     kernel_kwargs: dict | None = None,
     mcmc_kwargs: dict | None = None,
     rng_key: ArrayLike | None = None,
-    return_deterministic: bool = True
-    ) -> tuple[DataTree, MCMC]:
+    return_deterministic: bool = True,
+    *,
+    dims: dict[str, list[str]] | None = None,
+    coords: dict | None = None,
+    ) -> FitResult:
 
-    """Run MCMC inference on a NumPyro model and return an xarray.DataTree.
+    """Run MCMC inference on a dynamirt NumPyro model. Returns a FitResult with native sampler access.
 
     Args:
         model: A NumPyro model function with signature
@@ -38,12 +130,13 @@ def fit_mcmc(
             to ``{"num_warmup": 1500, "num_samples": 500, "num_chains": 4}``.
         rng_key: JAX PRNG key. Defaults to ``PRNGKey(0)``.
         return_deterministic: Should deterministic sites be included in
-            the trace. Default True.
+            the fitting trace. Default True.
+        dims: Optional site-to-dimension overrides for ArviZ conversion.
+        coords: Optional dimension labels, e.g. latent or item names.
 
     Returns:
-        A tuple (idata, mcmc) where idata is an
-        ``arviz.InferenceData`` object and mcmc is the fitted
-        ``numpyro.infer.MCMC`` instance.
+        A FitResult. Access the sampler through ``result.inference`` and
+        call ``result.to_idata()`` for labeled ArviZ data.
     """
     
     covariates = {} if covariates is None else covariates
@@ -59,9 +152,7 @@ def fit_mcmc(
     mcmc = MCMC(kernel_class(fit_model, **kernel_kwargs), **mcmc_kwargs)
     mcmc.run(rng_key, responses, covariates)
 
-    idata = az.from_numpyro(mcmc)
-
-    return idata, mcmc
+    return _make_result(mcmc, model, responses, covariates, dims, coords)
 
 
 def fit_svi(
@@ -73,14 +164,16 @@ def fit_svi(
     optim_kwargs: dict | None = None,
     run_kwargs: dict | None = None,
     rng_key: ArrayLike | None = None,
-    num_samples: int=500,
-    return_deterministic: bool=True
-    ) -> tuple[DataTree, AutoGuide, SVIRunResult]:
+    return_deterministic: bool=True,
+    *,
+    dims: dict[str, list[str]] | None = None,
+    coords: dict | None = None,
+    ) -> FitResult:
 
-    """Run stochastic variational inference (SVI) on a NumPyro model.
+    """Run stochastic variational inference (SVI) on a daynamirt NumPyro model.
 
-    After optimisation, draws posterior samples from the fitted guide and
-    packages them into an xarray.DataTree.
+    Returns native SVI state. Posterior draws are generated lazily when
+    ``result.to_idata()`` is called.
 
     Args:
         model: A NumPyro model function with signature
@@ -92,20 +185,18 @@ def fit_svi(
         guide_kwargs: Extra keyword arguments forwarded to the guide
             constructor. Defaults to an empty dict.
         optim_kwargs: Keyword arguments forwarded to the ``Adam``
-            optimiser. Defaults to ``{"step_size": 1e-4}``.
+            optimiser. Defaults to ``{"step_size": 1e-3}``.
         run_kwargs: Keyword arguments controlling the SVI run. Must
             contain ``"num_steps"``. Defaults to ``{"num_steps": 5000}``.
         rng_key: JAX PRNG key. Defaults to ``jax.random.key(0)``.
-        num_samples: Number of posterior samples drawn from the fitted
-            guide for the returned InferenceData. Defaults to 500.
         return_deterministic: Should deterministic sites be included in
-            the trace. Default True.
+            the fitting trace. Default True.
+        dims: Optional site-to-dimension overrides for ArviZ conversion.
+        coords: Optional dimension labels, e.g. latent or item names.
 
     Returns:
-        A tuple (idata, guide, svi_result) where idata is an
-        ``arviz.InferenceData`` object, guide is the fitted autoguide
-        instance, and svi_result is the ``SVIRunResult`` returned by
-        ``svi.run``.
+        A FitResult whose ``inference`` is an SVIState containing the SVI
+        object and optimization result.
     """
     covariates = {} if covariates is None else covariates
 
@@ -123,13 +214,7 @@ def fit_svi(
     svi = SVI(fit_model, guide, optim, Trace_ELBO())
     svi_result = svi.run(rng_key, run_kwargs["num_steps"], responses, covariates)
 
-    idata = az.from_numpyro_svi(
-        svi,
-        svi_result=svi_result,
-        num_samples=num_samples,
-        model_kwargs={"responses": responses, "covariates": covariates}
-        )
-    
-    # add predictive
-    
-    return idata, guide, svi_result
+    return _make_result(
+        SVIState(svi, svi_result), model, responses, covariates,
+        dims, coords,
+    )
