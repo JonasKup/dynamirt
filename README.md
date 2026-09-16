@@ -45,7 +45,8 @@ covariates = {
     "time": ...,
 }
 
-intercept = Linear("respondent_mean", "one_", group_by="respondent_id")
+intercept = Linear("respondent_mean", group_by="respondent_id")
+
 trajectory = HSGP(
     name="trajectory",
     predictors="time",
