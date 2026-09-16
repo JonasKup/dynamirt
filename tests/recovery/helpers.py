@@ -25,14 +25,14 @@ SEED = 0
 def fit_responses(model, responses, fitting_seed):
     """Shared small NUTS fit for binary and ordinal recovery tests."""
     jax.clear_caches()  # Release previous fits' compiled code on small machines.
-    idata, mcmc = fit_mcmc(
+    fit = fit_mcmc(
         model, responses, {}, rng_key=jax.random.PRNGKey(fitting_seed),
         return_deterministic=False,
         kernel_kwargs={"target_accept_prob": 0.9, "max_tree_depth": 8},
         mcmc_kwargs={"num_warmup": WARMUP, "num_samples": SAMPLES, "num_chains": CHAINS,
                      "chain_method": "sequential", "progress_bar": False},
     )
-    del idata
+    mcmc = fit.inference
     return mcmc.get_samples(), int(np.sum(mcmc.get_extra_fields()["diverging"]))
 
 
