@@ -3,7 +3,8 @@ build-backend = "hatchling.build"
 requires = ["hatchling"]
 
 [tool.pytest.ini_options]
-markers = ["slow: fits models using SVI"]
+pythonpath = ["src"]
+markers = ["slow: fits models using SVI or MCMC"]
 
 [project]
 name = "dynamirt"
