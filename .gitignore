@@ -5,7 +5,14 @@ __pycache__/
 # Jupyter
 .ipynb_checkpoints/
 
-# Editor / OS (optional, add if relevant to you)
+# Editor / OS
 .DS_Store
 .vscode/
 .idea/
+
+# Virtual environments
+.venv/
+.venv-release/
+
+# Build artifacts
+dist/
