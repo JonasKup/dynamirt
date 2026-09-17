@@ -4,5 +4,6 @@
 # dynamirt.Linear (also possible)
 
 from .gllvm.terms.linear import Linear
+from .gllvm.terms.custom import CustomTerm
 from .gllvm.terms.discrete import GRW, AR1
 from .gllvm.terms.continuous import ExactGP, HSGP

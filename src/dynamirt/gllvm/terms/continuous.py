@@ -28,11 +28,11 @@ def _pad_by_group(X, idx, n_groups):
 
     group_pos = np.arange(idx.size) - np.searchsorted(sorted_idx, sorted_idx, side='left')
 
-    padded = np.zeros((n_groups, n_max_points, X.shape[1]), dtype=X.dtype)
+    padded = jnp.zeros((n_groups, n_max_points, X.shape[1]), dtype=X.dtype)
     valid = np.zeros((n_groups, n_max_points), bool)
     slot = np.empty_like(idx)
 
-    padded[sorted_idx, group_pos] = X[order]
+    padded = padded.at[sorted_idx, group_pos].set(X[order])
     valid[sorted_idx, group_pos] = True
     slot[order] = group_pos
     

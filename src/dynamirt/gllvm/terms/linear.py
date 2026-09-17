@@ -9,7 +9,6 @@ import numpyro.distributions as dist
 
 import jax.numpy as jnp
 
-# To do: add Custom term?
 # remove corr = both path
 
 @dataclass(frozen=True)
