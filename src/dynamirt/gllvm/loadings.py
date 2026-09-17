@@ -4,10 +4,48 @@ import numpy as np
 
 import numpyro
 import numpyro.distributions as dist
+
+from numbers import Integral
+
 import jax.numpy as jnp
 from jax.typing import ArrayLike
 
 from ._context import _Context
+
+def q_matrix(factors, items):
+    """Build a binary item-by-factor NumPy array for ``Confirmatory``.
+
+    Each list in ``factors`` contains the items loading on that factor.
+    ``items`` is either the total item count (using zero-based integer
+    indices in ``factors``), or unique item names in response-column order.
+    Items may occur in multiple factors; unlisted items have all-zero rows.
+
+    Examples:
+        >>> q_matrix([[0, 1], [2, 3]], items=4)
+        array([[1, 0],
+               [1, 0],
+               [0, 1],
+               [0, 1]])
+        >>> q_matrix([["a", "b"], ["c", "d"]], items=["a", "b", "c", "d"])
+        array([[1, 0],
+               [1, 0],
+               [0, 1],
+               [0, 1]])
+    """
+    indexed = isinstance(items, Integral) and not isinstance(items, bool)
+    if indexed:
+        lookup = {i: i for i in range(items)}
+    else:
+        names = list(items)
+        lookup = {name: i for i, name in enumerate(names)}
+
+    factors = list(factors)
+    Q = np.zeros((len(lookup), len(factors)), dtype=int)
+    for column, factor in enumerate(factors):
+        for item in factor:
+            Q[lookup[item], column] = 1
+    return Q
+
 
 def Fixed() -> Callable:
     """

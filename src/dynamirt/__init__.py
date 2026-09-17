@@ -7,6 +7,7 @@ from .gllvm.context import ModelContext
 from .gllvm.terms.discrete import GRW, AR1
 from .gllvm.terms.continuous import ExactGP, HSGP
 from .gllvm.loadings import Full, Fixed, Confirmatory, Sparsity
+from .loadings import q_matrix
 from .gllvm.parameters import Param, Pool
 
 __all__ = [
@@ -14,5 +15,6 @@ __all__ = [
     "Linear", "GRW", "AR1", "ExactGP", "HSGP",
     "CustomTerm", "ModelContext",
     "Full", "Fixed", "Confirmatory", "Sparsity",
+    "q_matrix",
     "Param", "Pool",
 ]

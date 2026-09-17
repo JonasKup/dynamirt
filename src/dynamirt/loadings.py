@@ -3,4 +3,4 @@
 # dynamirt.gllvm.loadings.Full or top level 
 # dynamirt.Full (also possible)
 
-from .gllvm.loadings import Full, Fixed, Confirmatory, Sparsity
+from .gllvm.loadings import Full, Fixed, Confirmatory, Sparsity, q_matrix
