@@ -114,7 +114,7 @@ def dynamirt(
         latent_site_name="theta"
     )
 
-    # Semantic axes for public outputs; internal/custom sites use ArviZ defaults.
+    # ----------------- state for downstream analysis/ArviZ -----------------
     model._dynamirt_dims = {
         "theta": ["obs", "latent"],
         "loadings": ["item", "latent"],
@@ -123,5 +123,8 @@ def dynamirt(
         **{f"{term.name}_eta": ["obs", "item"] for term in full_rank},
     }
     model._dynamirt_n_latent = n_latent
+    # Baseline measurement terms and category counts for item-response curves.
+    model._dynamirt_baseline_terms = full_rank[:1] if model_type in _DICHOTOMOUS else []
+    model._dynamirt_n_cat = 2 if model_type in _DICHOTOMOUS else model_type_kwargs["n_cat"]
     
     return model

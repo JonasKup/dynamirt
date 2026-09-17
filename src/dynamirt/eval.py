@@ -1,4 +1,4 @@
-"""Posterior trajectory and loading plots."""
+"""Posterior plots and baseline item-response probabilities."""
 
 from collections.abc import Mapping, Sequence
 
@@ -7,6 +7,11 @@ import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 import numpy as np
 import xarray as xr
+import jax
+import jax.numpy as jnp
+from numpyro import handlers
+
+from .fit import FitResult
 
 
 def plot_trajectories(
@@ -53,26 +58,12 @@ def plot_trajectories(
         )
 
     for name, label in (coords or {}).items():
-        # if name not in values.coords:
-        #     raise KeyError(f"Observation coordinate {name!r} is missing")
-        # if values[name].dims != ("obs",) or np.ndim(label) != 0:
-        #     raise ValueError("coords must select scalar values of observation coordinates")
         values = values.isel(obs=values[name] == label)
-    # if not values.sizes["obs"]:
-    #     raise ValueError("No observations match coords")
-    # if time not in values.coords:
-    #     raise KeyError(f"Time coordinate {time!r} is missing")
-    # if values[time].dims != ("obs",):
-    #     raise ValueError("The time coordinate must have dimension obs")
-    # if np.unique(values[time].values).size != values.sizes["obs"]:
-    #     raise ValueError("Selected times must be unique; select one respondent/session or aggregate first")
     
     values = values.sortby(time)
     if latent is not None:
         labels = [latent] if np.isscalar(latent) else list(latent)
         values = values.sel(latent=labels)
-    # if not values.sizes["latent"]:
-    #     raise ValueError("Select at least one latent")
 
     median = values.median(dim=sample_dims)
     interval = az.hdi(values, dim=sample_dims, prob=prob)
@@ -169,4 +160,198 @@ def plot_loadings(
     ax.tick_params(which="minor", length=0)
     if colorbar:
         ax.figure.colorbar(im, ax=ax, shrink=0.8)
+    return ax
+
+
+def item_curves(
+    result: FitResult,
+    *,
+    latent: str | int | Sequence[str | int] | None = None,
+    theta_range: tuple[float, float] = (-3, 3),
+    n_points: int = 100,
+    posterior: xr.Dataset | xr.DataTree | None = None,
+    num_samples: int | None = None,
+) -> xr.Dataset:
+    """Evaluate baseline category probabilities on a one- or two-factor grid. 
+    I.e. get item characteristic curves/item response functions for a model
+    with up to two latent dimensions.
+
+    Args:
+        result: FitResult from a model built with dynamirt.
+        latent: One or two latent coordinate labels to vary. Required for
+            multidimensional models; other latent coordinates stay at zero.
+        theta_range: Increasing (lower, upper) bounds, shared by grid axes.
+        n_points: Points per axis (a two-factor grid has n_points**2 points).
+        posterior: Optional posterior Dataset or idata["posterior"] DataTree
+            node, retaining all stochastic measurement parameters in model
+            order. Defaults to result.to_idata()["posterior"]. Reuse this
+            argument to evaluate the same draws on different grids.
+        num_samples: SVI draw count when posterior is omitted; defaults to
+            the conversion default (500). Leave None for MCMC or posterior.
+
+    Returns:
+        Dataset with probability (*sample_dims, point, item, category),
+        theta (point, latent), and valid_category (item, category). Sampling
+        dimensions and coordinate labels are retained. The varied_latent
+        attribute records the grid axes in order. Invalid categories have
+        probability zero. DIF contributions are excluded; binary item
+        intercepts are retained. These are conditional slices, not averages
+        over the other latent dimensions or training covariates.
+    """
+    if posterior is None:
+        posterior = result.to_idata(num_samples=num_samples)["posterior"]
+    elif num_samples is not None:
+        raise ValueError("num_samples applies only when posterior is omitted")
+    
+    if isinstance(posterior, xr.DataTree):
+        posterior = posterior.to_dataset()
+        
+    n_latent = result.model._dynamirt_n_latent
+    n_items = np.shape(result.responses)[1]
+    labels = np.asarray(posterior.coords.get(
+        "latent", result.coords.get("latent", np.arange(n_latent))
+    ))
+    
+    if latent is None:
+        if n_latent != 1:
+            raise ValueError("Select one or two latent labels for a multidimensional model")
+        selected = labels.tolist()
+    else:
+        selected = [latent] if np.isscalar(latent) else list(latent)
+    if len(selected) not in (1, 2) or len(set(selected)) != len(selected):
+        raise ValueError("Select one or two distinct latent labels")
+    
+    indices = [labels.tolist().index(label) for label in selected]
+    
+    if n_points < 2 or theta_range[0] >= theta_range[1]:
+        raise ValueError("Use n_points >= 2 and increasing theta_range bounds")
+    
+    axis = np.linspace(*theta_range, n_points)
+    mesh = np.meshgrid(*[axis] * len(selected), indexing="ij")
+    theta = np.zeros((n_points ** len(selected), n_latent))
+    theta[:, indices] = np.stack([m.ravel() for m in mesh], axis=-1)
+
+    def grid_term(ctx, n_latent):
+        return jnp.asarray(theta)
+    
+    grid_term.name = "theta_grid"
+
+    def grid_model():
+        result.model(
+            responses=None, covariates={}, n_obs=len(theta), n_var=n_items,
+            latent_regression=[grid_term],
+            full_rank_regression=result.model._dynamirt_baseline_terms,
+        )
+
+    key = jax.random.key(0)
+    traced = handlers.trace(handlers.seed(grid_model, key)).get_trace()
+    sites = [name for name, site in traced.items()
+             if site["type"] == "sample" and name != "Y"]
+    missing = set(sites) - set(posterior.data_vars)
+    
+    if missing:
+        raise ValueError(f"Posterior is missing measurement parameters: {sorted(missing)}")
+    
+    sample_dims = [d for d in ("chain", "draw", "sample") if d in posterior.dims]
+    sample_shape = tuple(posterior.sizes[d] for d in sample_dims)
+    n_draws = int(np.prod(sample_shape))
+    draws = {}
+    
+    for name in sites:
+        values = posterior[name].transpose(*sample_dims, ...).values
+        draws[name] = jnp.asarray(values.reshape((n_draws,) + values.shape[len(sample_dims):]))
+
+    def probs_for_draw(draw, draw_key):
+        substituted = handlers.substitute(grid_model, draw)
+        response_dist = handlers.trace(handlers.seed(substituted, draw_key)).get_trace()["Y"]["fn"]
+        support = response_dist.enumerate_support(expand=False)
+        return jnp.moveaxis(jnp.exp(response_dist.log_prob(support)), 0, -1)
+
+    probabilities = np.asarray(jax.vmap(probs_for_draw)(
+        draws, jax.random.split(key, n_draws)
+    ))
+    n_cat = probabilities.shape[-1]
+    counts = np.broadcast_to(result.model._dynamirt_n_cat, (n_items,))
+    
+    return xr.Dataset(
+        {
+            "probability": ((*sample_dims, "point", "item", "category"),
+                            probabilities.reshape(*sample_shape, len(theta), n_items, n_cat)),
+            "theta": (("point", "latent"), theta),
+            "valid_category": (("item", "category"), np.arange(n_cat) < counts[:, None]),
+        },
+        coords={
+            **{d: np.asarray(posterior[d]) for d in sample_dims},
+            "point": np.arange(len(theta)), "latent": labels,
+            "item": np.asarray(posterior.coords.get(
+                "item", result.coords.get("item", np.arange(n_items))
+            )),
+            "category": np.arange(n_cat),
+        },
+        attrs={"varied_latent": selected, "DIF": "excluded"},
+    )
+
+
+def plot_item_curves(
+    curves: xr.Dataset,
+    *,
+    item: str | int = 0,
+    category: int | None = None,
+    prob: float = 0.95,
+    ax: Axes | None = None,
+) -> Axes:
+    """Plot one item's baseline response curves or a category heatmap.
+
+    Args:
+        curves: Dataset returned by item_curves.
+        item: Item coordinate label (not positional index).
+        category: Category label. None shows category 1 for binary items or
+            all valid categories for ordinal 1D curves. Ordinal 2D plots
+            require a category.
+        prob: Pointwise posterior HDI mass for 1D curves. Two-dimensional
+            heatmaps show posterior medians without intervals.
+        ax: Optional matplotlib Axes. Titles and layout are left to the caller.
+
+    Returns:
+        Matplotlib Axes. One-dimensional lines have category labels for use
+        with ax.legend(); two-dimensional plots include a probability colorbar.
+    """
+    selected = curves.attrs["varied_latent"]
+    valid = curves.category.values[curves.valid_category.sel(item=item).values]
+    if category is None:
+        if len(valid) == 2:
+            categories = [1]
+        elif len(selected) == 2:
+            raise ValueError("Select a category for a two-dimensional ordinal plot")
+        else:
+            categories = valid
+    else:
+        if category not in valid:
+            raise ValueError(f"Category {category} is not valid for item {item!r}")
+        categories = [category]
+    values = curves.probability.sel(item=item, category=categories)
+    sample_dims = [d for d in ("chain", "draw", "sample") if d in values.dims]
+    median = values.median(sample_dims)
+    if ax is None:
+        _, ax = plt.subplots()
+    x = curves.theta.sel(latent=selected[0]).values
+    if len(selected) == 1:
+        interval = az.hdi(values, dim=sample_dims, prob=prob)
+        for cat in categories:
+            line, = ax.plot(x, median.sel(category=cat).values, label=str(cat))
+            ax.fill_between(
+                x, interval.sel(category=cat, ci_bound="lower").values,
+                interval.sel(category=cat, ci_bound="upper").values,
+                color=line.get_color(), alpha=0.3,
+            )
+        ax.set_ylim(0, 1)
+        ax.set_ylabel("Probability")
+    else:
+        y = curves.theta.sel(latent=selected[1]).values
+        xs, ys = np.unique(x), np.unique(y)
+        z = median.sel(category=categories[0]).values.reshape(len(xs), len(ys))
+        im = ax.pcolormesh(xs, ys, z.T, shading="auto", vmin=0, vmax=1)
+        ax.figure.colorbar(im, ax=ax, label=f"P(Y = {categories[0]})")
+        ax.set_ylabel(str(selected[1]))
+    ax.set_xlabel(str(selected[0]))
     return ax
