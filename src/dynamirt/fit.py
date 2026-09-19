@@ -168,7 +168,7 @@ def fit_svi(
     covariates: Mapping[str, ArrayLike] = None,
     guide_class: type[AutoGuide] = AutoNormal,
     guide_kwargs: dict | None = None,
-    optim_kwargs: dict | None = None,
+    optim: Callable | None = None,
     run_kwargs: dict | None = None,
     rng_key: ArrayLike | None = None,
     return_deterministic: bool=True,
@@ -203,16 +203,17 @@ def fit_svi(
     covariates = {} if covariates is None else covariates
 
     guide_kwargs = guide_kwargs or {}
-    optim_kwargs = optim_kwargs or {"step_size": 1e-3}
     run_kwargs = run_kwargs or {"num_steps": 5000}
     rng_key = rng_key if rng_key is not None else jax.random.key(0)
+    
+    if optim is None:
+        optim = Adam(step_size=1e-3)
 
     # record deterministic sites? Useful for decreasing RAM usage.
     _hide_deterministic = lambda site: site["type"] == "deterministic"
     fit_model = model if return_deterministic else block(model, hide_fn=_hide_deterministic)
     
     guide = guide_class(fit_model, **guide_kwargs)
-    optim = Adam(**optim_kwargs)
     svi = SVI(fit_model, guide, optim, Trace_ELBO())
     svi_result = svi.run(rng_key, run_kwargs["num_steps"], responses, covariates)
 
