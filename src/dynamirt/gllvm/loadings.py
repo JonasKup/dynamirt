@@ -72,7 +72,7 @@ def Confirmatory(
     Args:
         Q: Binary (n_var, n_latent) array. Q[i, j] = 1 means item i is
             allowed to load on factor j; 0 means the loading is fixed at 0.
-        positive_anchors: Optional binary array of the same shape as Q.
+        positive: Optional binary array of the same shape as Q.
             Marks a subset of Q's nonzero entries as positive-only anchor loadings.
             If None, all free loadings are unconstrained in sign.
             Defaults to None.
@@ -89,13 +89,21 @@ def Confirmatory(
     free_prior = dist.Normal(0, 1) if free_prior is None else free_prior
     positive_prior = dist.LogNormal(0, 0.5) if positive_prior is None else positive_prior
     
-    rows, cols = np.nonzero(np.asarray(Q))
-    pos = (np.zeros(rows.size, bool) if positive is None
-           else np.asarray(positive)[rows, cols].astype(bool))
+    Q = np.asarray(Q)
+    if Q.ndim != 2 or not np.isin(Q, [0, 1]).all():
+        raise ValueError("Q must be a binary matrix")
+    positive = np.zeros_like(Q, dtype=bool) if positive is None else np.asarray(positive)
+    if (positive.shape != Q.shape or not np.isin(positive, [0, 1]).all()
+            or np.any(positive > Q)):
+        raise ValueError("positive must be a binary subset of Q")
+    rows, cols = np.nonzero(Q)
+    pos = positive[rows, cols].astype(bool)
     free = ~pos
     n_free, n_pos = int(free.sum()), int(pos.sum())
 
     def loadings(ctx: _Context):
+        if Q.shape != (ctx.n_var, ctx.n_latent):
+            raise ValueError("Q shape must match items and latents")
         discrimination = jnp.zeros((ctx.n_var, ctx.n_latent))
 
         if n_free:
@@ -179,7 +187,7 @@ def Sparsity(tau0=1.0, slab_scale: float=1.0, slab_df: float=4.0) -> Callable:
         lam_regularized = (c_sq * lam_sq) / (c_sq + tau_sq * lam_sq) # regularization
         
         beta = numpyro.sample("beta", dist.Normal(0, 1).expand(shape).to_event(2))
-        discrimination = beta * jnp.sqrt(lam_regularized * tau)
+        discrimination = beta * tau * jnp.sqrt(lam_regularized)
                 
         return discrimination
     return loadings
