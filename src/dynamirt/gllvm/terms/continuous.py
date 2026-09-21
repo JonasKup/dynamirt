@@ -232,13 +232,19 @@ class HSGP:
         
         idx, n_groups = ctx._factorize(self.group_by)
         n_target = n_vars if self.varies_over_variables else 1
+        # check the raw covariates; X itself is traced during inference
+        keys = [self.predictors] if isinstance(self.predictors, str) else list(self.predictors)
+        for key, bound in zip(keys, np.broadcast_to(self.ell, len(keys))):
+            if np.any(np.abs(np.asarray(ctx.covariates[key])) > bound):
+                raise ValueError(f"HSGP {self.name!r}: inputs must lie within [-ell, ell]; "
+                                 "center/scale the predictors or increase ell")
         X = ctx._design(self.predictors)
 
         alpha = self.amplitude(f"{self.name}_amplitude", n_groups, n_target)
         length = self.length(f"{self.name}_length", n_groups, n_target)
         
         phi = eigenfunctions(x=X, ell=self.ell, m=self.m) # (n_obs, n_basis)
-        spd = self._sqrt_spectral_density(alpha, length, X.shape[-1])  # (n_groups, n_target, n_basis)
+        spd = self._sqrt_spectral_density(alpha**2, length, X.shape[-1])  # (n_groups, n_target, n_basis)
         beta = numpyro.sample(f"{self.name}_beta", dist.Normal(0, 1).expand((n_groups, n_target, phi.shape[-1])).to_event(3))
 
         weights = spd * beta
