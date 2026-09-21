@@ -19,7 +19,11 @@ def calibration(
     num_samples: int | None = None,
     n_bins: int = 10,
 ) -> xr.Dataset:
-    """Calculate per-item, per-category calibration on the original training rows.
+    """
+    WIP - should operate on held out data eventually. As of now might lead to
+    misleading results when calibrated on train data.
+    
+    Calculate per-item, per-category calibration on the original training rows.
 
     Replays the full model, including latent terms and DIF, using joint
     posterior draws. Only stochastic parameters are reused; deterministic
