@@ -59,8 +59,11 @@ class Param:
         
         # either by_group or by_variable are set to pooling at this point
         pool = self.by_group if isinstance(self.by_group, Pool) else self.by_variable
-        loc = pool.loc(f"{name}_loc", n_groups, n_target, trailing)
-        scale = pool.scale(f"{name}_scale", n_groups, n_target, trailing)
+        # hyperparameters are shared along the pooled axis and follow the other axis's setting
+        hyper_groups = n_groups if self.by_group == "free" else 1
+        hyper_target = n_target if self.by_variable == "free" else 1
+        loc = pool.loc(f"{name}_loc", hyper_groups, hyper_target, trailing)
+        scale = pool.scale(f"{name}_scale", hyper_groups, hyper_target, trailing)
         unconstrained = loc + scale * raw
         return  pool.transform(unconstrained)
     
@@ -77,11 +80,15 @@ class Pool:
     Attributes:
         loc: ``Param`` for the hyper-mean. Defaults to Normal(0, 1).
         scale: ``Param`` for the hyper-scale. Defaults to HalfNormal(0.5).
+            Hyperparameters are always shared along the pooled axis. Along
+            the other axis, the defaults follow the pooled ``Param``: one
+            value if it is ``"shared"``, one per level if it is ``"free"``.
+            Pass a shared ``Param`` to use a single value instead.
         transform: Bijective transform applied after the affine
             ``loc + scale * raw`` step (e.g. ``ExpTransform`` to
             constrain the result to be positive). Defaults to the
             identity transform.
     """
-    loc: Param = Param(dist.Normal(0.0, 1.0), by_variable="free")
-    scale: Param = Param(dist.HalfNormal(0.5), by_variable="free")
+    loc: Param = Param(dist.Normal(0.0, 1.0), by_group="free", by_variable="free")
+    scale: Param = Param(dist.HalfNormal(0.5), by_group="free", by_variable="free")
     transform: dist.transforms.Transform = field(default_factory=dist.transforms.IdentityTransform)
