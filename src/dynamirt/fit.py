@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field
-from numbers import Integral
 from typing import Any, Callable, Mapping
 
 import arviz as az
@@ -72,12 +71,13 @@ class FitResult:
                 raise ValueError("num_samples is only supported for SVI conversion")
             idata = az.from_numpyro(self.inference, pred_dims=conversion_dims, **kwargs)
         elif isinstance(self.inference, SVIState):
-            num_samples = 500 if num_samples is None else num_samples
+            if num_samples is None:
+                num_samples = 500
 
             idata = az.from_numpyro_svi(
                 self.inference.svi,
                 svi_result=self.inference.result,
-                num_samples=int(num_samples),
+                num_samples=num_samples,
                 model_args=(self.responses, self.covariates),
                 pred_dims=conversion_dims,
                 **kwargs,
@@ -135,7 +135,7 @@ def fit_mcmc(
         kernel_class: MCMC kernel class. Defaults to ``NUTS``.
         kernel_kwargs: Extra keyword arguments forwarded to the kernel
             constructor. Defaults to an empty dict.
-        mcmc_kwargs: Keyword arguments forwarded to ``MCMC``. Defaults
+        mcmc_kwargs: Keyword arguments forwarded to ``MCMC``. Overrides defaults
             to ``{"num_warmup": 1500, "num_samples": 500, "num_chains": 4}``.
         rng_key: JAX PRNG key. Defaults to ``PRNGKey(0)``.
         return_deterministic: Should deterministic sites be included in
@@ -149,7 +149,7 @@ def fit_mcmc(
     covariates = {} if covariates is None else covariates
     
     kernel_kwargs = kernel_kwargs or {}
-    mcmc_kwargs = mcmc_kwargs or {"num_warmup": 1500, "num_samples": 500, "num_chains": 4}
+    mcmc_kwargs = {"num_warmup": 1500, "num_samples": 500, "num_chains": 4, **(mcmc_kwargs or {})}
     rng_key = rng_key if rng_key is not None else jax.random.PRNGKey(0)
 
     # record deterministic sites? Useful for decreasing RAM usage.
@@ -172,6 +172,8 @@ def fit_svi(
     run_kwargs: dict | None = None,
     rng_key: ArrayLike | None = None,
     return_deterministic: bool=True,
+    *,
+    num_steps: int = 5000,
     ) -> FitResult:
 
     """Run stochastic variational inference (SVI) on a daynamirt NumPyro model.
@@ -188,10 +190,10 @@ def fit_svi(
             family. Defaults to ``AutoNormal``.
         guide_kwargs: Extra keyword arguments forwarded to the guide
             constructor. Defaults to an empty dict.
-        optim_kwargs: Keyword arguments forwarded to the ``Adam``
-            optimiser. Defaults to ``{"step_size": 1e-3}``.
-        run_kwargs: Keyword arguments controlling the SVI run. Must
-            contain ``"num_steps"``. Defaults to ``{"num_steps": 5000}``.
+        optim: NumPyro optimizer. Defaults to ``Adam(step_size=1e-3)``.
+        num_steps: Number of optimization steps. Defaults to 5000.
+        run_kwargs: Extra options forwarded to ``SVI.run``, such as
+            progress_bar or init_state. Defaults to an empty dict.
         rng_key: JAX PRNG key. Defaults to ``jax.random.key(0)``.
         return_deterministic: Should deterministic sites be included in
             the fitting trace. Default True.
@@ -203,7 +205,7 @@ def fit_svi(
     covariates = {} if covariates is None else covariates
 
     guide_kwargs = guide_kwargs or {}
-    run_kwargs = run_kwargs or {"num_steps": 5000}
+    run_kwargs = run_kwargs or {}
     rng_key = rng_key if rng_key is not None else jax.random.key(0)
     
     if optim is None:
@@ -215,7 +217,7 @@ def fit_svi(
     
     guide = guide_class(fit_model, **guide_kwargs)
     svi = SVI(fit_model, guide, optim, Trace_ELBO())
-    svi_result = svi.run(rng_key, run_kwargs["num_steps"], responses, covariates)
+    svi_result = svi.run(rng_key, num_steps, responses, covariates, **run_kwargs)
 
     return _make_result(
         SVIState(svi, svi_result), model, responses, covariates,
