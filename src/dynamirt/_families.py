@@ -43,6 +43,7 @@ def _dichotomous(
         
         return dist.BernoulliProbs(probs=p)
 
+    family.n_cat = 2
     return family
 
 # prior naming needs to be cleared up.
@@ -65,6 +66,11 @@ def _polytomous(
     gap_prior = dist.Normal(0, 0.5) if gap_prior is None else gap_prior
 
     counts = np.asarray(n_cat)
+    if (counts.ndim > 1 or counts.size == 0
+            or counts.dtype.kind not in "iu" or np.any(counts < 2)):
+        raise ValueError("n_cat must contain integers >= 2")
+    if counts.ndim == 0:
+        n_cat = int(counts)
     if counts.ndim:
         max_cat = int(counts.max())
         valid = np.arange(max_cat - 1) < counts[:, None] - 1
@@ -72,6 +78,8 @@ def _polytomous(
         categories = jnp.arange(max_cat)
 
     def family(eta, ctx):
+        if counts.ndim and counts.shape != (ctx.n_var,):
+            raise ValueError("n_cat must have one count per item")
         if counts.ndim:
             if model_type == "GRM":
                 base = dist.Normal(
@@ -118,4 +126,5 @@ def _polytomous(
         logits = jnp.cumsum(jnp.pad(eta[..., None] - d, ((0, 0), (0, 0), (1, 0))), axis=-1)
         return dist.CategoricalLogits(logits)
 
+    family.n_cat = counts
     return family
