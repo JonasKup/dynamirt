@@ -73,13 +73,13 @@ class Linear:
         coef = self.coef.sample_raw(f"{self.name}_raw", n_free, n_target, (n_predictors,))
 
         # b = group_by-level, v = variable/latent, o = over
-        if self.corr == "predictors":
+        if self.corr == "predictors" and n_predictors > 1:
             L = numpyro.sample(f"{self.name}_L", dist.LKJCholesky(n_predictors, 1))
             coef = jnp.einsum("bvo,po->bvp", coef, L)
-        elif self.corr == "variables":
+        elif self.corr == "variables" and n_target > 1:
             L = numpyro.sample(f"{self.name}_L", dist.LKJCholesky(n_target, 1))
             coef = jnp.einsum("bvo,wv->bwo", coef, L)
-        elif self.corr == "both":
+        elif self.corr == "both" and n_target * n_predictors > 1:
             m = n_target * n_predictors
             L = numpyro.sample(f"{self.name}_L", dist.LKJCholesky(m, 1))
             b = coef.shape[0]
