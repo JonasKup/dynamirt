@@ -1,5 +1,6 @@
 from .api import dynamirt
 from .fit import fit_mcmc, fit_svi
+from .diagnostics import plot_item_curves, plot_loadings, plot_trajectories, item_curves
 
 from .gllvm.terms.linear import Linear
 from .gllvm.terms.custom import CustomTerm
