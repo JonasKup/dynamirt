@@ -19,6 +19,7 @@ def Bernoulli() -> Callable:
     """
     def family(eta: ArrayLike, ctx: _Context):
         return dist.Bernoulli(logits=eta)
+    family.n_cat = 2
     return family
 
 def Gaussian(sigma_prior: dist.Distribution | None=None) -> Callable:
