@@ -35,7 +35,7 @@ def plot_trajectories(
         var_name: Posterior trajectory variable. Defaults to "theta".
         latent: Latent coordinate label or labels, including integer labels.
             None plots all latents. Defaults to None.
-        prob: Probability mass of the pointwise HDI. Defaults to 0.9.
+        prob: Probability mass of the pointwise HDI. Defaults to 0.95.
         ax: Axes to draw on. Creates one if None. Defaults to None.
 
     Returns:
@@ -47,6 +47,10 @@ def plot_trajectories(
         ValueError: If dimensions or selections are invalid, no observations
             remain, or selected times are missing or duplicated.
     """
+    if not 0 < prob < 1:
+        raise ValueError("prob must lie between zero and one")
+    if var_name not in idata["posterior"]:
+        raise KeyError(f"Posterior variable missing: {var_name}")
     values = idata["posterior"][var_name]
     sample_dims = [dim for dim in ("chain", "draw", "sample") if dim in values.dims]
     if (
@@ -57,9 +61,21 @@ def plot_trajectories(
             f"{var_name!r} must have obs and latent dimensions plus chain/draw or sample"
         )
 
+    for name in {time, *(coords or {})}:
+        if name not in values.coords:
+            raise KeyError(f"Unknown coordinate: {name}")
+        if values[name].dims != ("obs",):
+            raise ValueError(f"{name} must be an obs coordinate")
     for name, label in (coords or {}).items():
+        if not np.isscalar(label):
+            raise ValueError("Selections must be scalar")
         values = values.isel(obs=values[name] == label)
-    
+    if not values.sizes["obs"]:
+        raise ValueError("No observations selected")
+    times = values[time]
+    if times.isnull().any().item() or len(np.unique(times)) != times.size:
+        raise ValueError("Times must be present and unique")
+
     values = values.sortby(time)
     if latent is not None:
         labels = [latent] if np.isscalar(latent) else list(latent)
