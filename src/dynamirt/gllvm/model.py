@@ -8,7 +8,19 @@ from jax.typing import ArrayLike
 
 from ._context import _Context
 from .loadings import Full
-    
+
+
+def _validate_responses(responses, discrete, n_cat=None):
+    values = np.asarray(responses)
+    observed = ~np.isnan(values)
+    if not np.all(np.isfinite(values[observed])):
+        raise ValueError("Responses must be finite or NaN")
+    if discrete and np.any(values[observed] != np.floor(values[observed])):
+        raise ValueError("Responses must be integers or NaN")
+    if n_cat is not None and np.any(observed & ((values < 0) | (values >= n_cat))):
+        raise ValueError("Response category out of range")
+
+
 def gllvm(
     responses: None | ArrayLike,
     covariates: Mapping[str, ArrayLike],
@@ -136,6 +148,7 @@ def gllvm(
     if responses is None:
         numpyro.sample("Y", family_fn)
     else:
+        _validate_responses(responses, family_fn.support.is_discrete, getattr(family, "n_cat", None))
         mask = jnp.isnan(responses)
         obs=jnp.where(mask, 0.0, responses)
         
