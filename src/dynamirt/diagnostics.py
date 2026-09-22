@@ -23,6 +23,8 @@ def plot_trajectories(
     latent: str | int | Sequence[str | int] | None = None,
     prob: float = 0.95,
     ax: Axes | None = None,
+    line_kwargs: Mapping[str, object] | None = None,
+    fill_kwargs: Mapping[str, object] | None = None,
 ) -> Axes:
     """Plot one respondent's latent medians and pointwise posterior HDIs.
 
@@ -37,6 +39,14 @@ def plot_trajectories(
             None plots all latents. Defaults to None.
         prob: Probability mass of the pointwise HDI. Defaults to 0.95.
         ax: Axes to draw on. Creates one if None. Defaults to None.
+        line_kwargs: Extra keyword arguments for the median lines
+            (ax.plot), overriding the defaults marker="o", markersize=3 and
+            the latent label. Use {"marker": ""} to hide markers. Applied to
+            every latent, so a "color" or "label" here is shared by all lines.
+            Defaults to None.
+        fill_kwargs: Extra keyword arguments for the HDI bands
+            (ax.fill_between), overriding the defaults alpha=0.3 and the
+            matching line color. Defaults to None.
 
     Returns:
         The matplotlib Axes. Lines are labeled using latent coordinates;
@@ -88,13 +98,13 @@ def plot_trajectories(
     for label in values.latent.values:
         line, = ax.plot(
             values[time].values, median.sel(latent=label).values,
-            marker="o", markersize=3, label=str(label),
+            **{"marker": "o", "markersize": 3, "label": str(label), **(line_kwargs or {})},
         )
         ax.fill_between(
             values[time].values,
             interval.sel(latent=label, ci_bound="lower").values,
             interval.sel(latent=label, ci_bound="upper").values,
-            color=line.get_color(), alpha=0.3,
+            **{"color": line.get_color(), "alpha": 0.3, **(fill_kwargs or {})},
         )
     ax.set_xlabel(time)
     ax.set_ylabel(var_name)
@@ -112,6 +122,9 @@ def plot_loadings(
     vmax: float | None = None,
     colorbar: bool = True,
     ax: Axes | None = None,
+    imshow_kwargs: Mapping[str, object] | None = None,
+    text_kwargs: Mapping[str, object] | None = None,
+    colorbar_kwargs: Mapping[str, object] | None = None,
 ) -> Axes:
     """Plot posterior median loadings as a heatmap.
 
@@ -128,6 +141,14 @@ def plot_loadings(
             largest absolute median, or 1 for all-zero medians. Defaults to None.
         colorbar: Add a colorbar to the figure. Defaults to True.
         ax: Axes to draw on. Creates one if None. Defaults to None.
+        imshow_kwargs: Extra keyword arguments for the heatmap (ax.imshow),
+            overriding cmap, the symmetric vmin/vmax and aspect="auto".
+            Defaults to None.
+        text_kwargs: Extra keyword arguments for the cell annotations
+            (ax.text), overriding fontsize=8 and the contrast-based color and
+            HDI-based fontweight in every cell. Defaults to None.
+        colorbar_kwargs: Extra keyword arguments for the colorbar
+            (Figure.colorbar), overriding shrink=0.8. Defaults to None.
 
     Returns:
         The matplotlib Axes. Titles and figure layout are left to the caller.
@@ -151,7 +172,10 @@ def plot_loadings(
     n_items, n_lat = median.shape
     if ax is None:
         _, ax = plt.subplots(figsize=(1.7 * n_lat + 2, 0.75 * n_items + 1.5))
-    im = ax.imshow(median, cmap=cmap, vmin=-vmax, vmax=vmax, aspect="auto")
+    im = ax.imshow(
+        median,
+        **{"cmap": cmap, "vmin": -vmax, "vmax": vmax, "aspect": "auto", **(imshow_kwargs or {})},
+    )
 
     if annotate:
         for i in range(n_items):
@@ -163,9 +187,12 @@ def plot_loadings(
                 luminance = linear @ np.array([0.2126, 0.7152, 0.0722])
                 ax.text(
                     j, i, f"{median[i, j]:.2f}\n[{lo[i, j]:.2f}, {hi[i, j]:.2f}]",
-                    ha="center", va="center", fontsize=8,
-                    color="black" if luminance > 0.179 else "white",
-                    fontweight="bold" if (lo[i, j] > 0) or (hi[i, j] < 0) else "normal",
+                    **{
+                        "ha": "center", "va": "center", "fontsize": 8,
+                        "color": "black" if luminance > 0.179 else "white",
+                        "fontweight": "bold" if (lo[i, j] > 0) or (hi[i, j] < 0) else "normal",
+                        **(text_kwargs or {}),
+                    },
                 )
 
     ax.set_xticks(range(n_lat), values["latent"].values)
@@ -175,7 +202,7 @@ def plot_loadings(
     ax.grid(which="minor", color="w", lw=1.5)
     ax.tick_params(which="minor", length=0)
     if colorbar:
-        ax.figure.colorbar(im, ax=ax, shrink=0.8)
+        ax.figure.colorbar(im, ax=ax, **{"shrink": 0.8, **(colorbar_kwargs or {})})
     return ax
 
 
@@ -315,6 +342,10 @@ def plot_item_curves(
     category: int | None = None,
     prob: float = 0.95,
     ax: Axes | None = None,
+    line_kwargs: Mapping[str, object] | None = None,
+    fill_kwargs: Mapping[str, object] | None = None,
+    mesh_kwargs: Mapping[str, object] | None = None,
+    colorbar_kwargs: Mapping[str, object] | None = None,
 ) -> Axes:
     """Plot one item's baseline response curves or a category heatmap.
 
@@ -327,6 +358,14 @@ def plot_item_curves(
         prob: Pointwise posterior HDI mass for 1D curves. Two-dimensional
             heatmaps show posterior medians without intervals.
         ax: Optional matplotlib Axes. Titles and layout are left to the caller.
+        line_kwargs: Extra keyword arguments for 1D median lines (ax.plot),
+            overriding the category label. Applied to every category.
+        fill_kwargs: Extra keyword arguments for 1D HDI bands
+            (ax.fill_between), overriding alpha=0.3 and the line color.
+        mesh_kwargs: Extra keyword arguments for the 2D heatmap
+            (ax.pcolormesh), overriding shading="auto", vmin=0 and vmax=1.
+        colorbar_kwargs: Extra keyword arguments for the 2D colorbar
+            (Figure.colorbar), overriding the probability label.
 
     Returns:
         Matplotlib Axes. One-dimensional lines have category labels for use
@@ -354,11 +393,14 @@ def plot_item_curves(
     if len(selected) == 1:
         interval = az.hdi(values, dim=sample_dims, prob=prob)
         for cat in categories:
-            line, = ax.plot(x, median.sel(category=cat).values, label=str(cat))
+            line, = ax.plot(
+                x, median.sel(category=cat).values,
+                **{"label": str(cat), **(line_kwargs or {})},
+            )
             ax.fill_between(
                 x, interval.sel(category=cat, ci_bound="lower").values,
                 interval.sel(category=cat, ci_bound="upper").values,
-                color=line.get_color(), alpha=0.3,
+                **{"color": line.get_color(), "alpha": 0.3, **(fill_kwargs or {})},
             )
         ax.set_ylim(0, 1)
         ax.set_ylabel("Probability")
@@ -366,8 +408,14 @@ def plot_item_curves(
         y = curves.theta.sel(latent=selected[1]).values
         xs, ys = np.unique(x), np.unique(y)
         z = median.sel(category=categories[0]).values.reshape(len(xs), len(ys))
-        im = ax.pcolormesh(xs, ys, z.T, shading="auto", vmin=0, vmax=1)
-        ax.figure.colorbar(im, ax=ax, label=f"P(Y = {categories[0]})")
+        im = ax.pcolormesh(
+            xs, ys, z.T,
+            **{"shading": "auto", "vmin": 0, "vmax": 1, **(mesh_kwargs or {})},
+        )
+        ax.figure.colorbar(
+            im, ax=ax,
+            **{"label": f"P(Y = {categories[0]})", **(colorbar_kwargs or {})},
+        )
         ax.set_ylabel(str(selected[1]))
     ax.set_xlabel(str(selected[0]))
     return ax

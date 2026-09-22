@@ -18,4 +18,5 @@ __all__ = [
     "Full", "Fixed", "Confirmatory", "Sparsity",
     "q_matrix",
     "Param", "Pool",
+    "plot_item_curves", "plot_loadings", "plot_trajectories", "item_curves"
 ]
