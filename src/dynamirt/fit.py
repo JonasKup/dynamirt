@@ -123,6 +123,8 @@ def fit_mcmc(
     mcmc_kwargs: dict | None = None,
     rng_key: ArrayLike | None = None,
     return_deterministic: bool = True,
+    *,
+    run_kwargs: dict | None = None,
     ) -> FitResult:
 
     """Run MCMC inference on a dynamirt NumPyro model. Returns a FitResult with native sampler access.
@@ -140,6 +142,8 @@ def fit_mcmc(
         rng_key: JAX PRNG key. Defaults to ``PRNGKey(0)``.
         return_deterministic: Should deterministic sites be included in
             the fitting trace. Default True.
+        run_kwargs: Extra keyword arguments forwarded to ``MCMC.run``, such as
+            ``extra_fields`` or ``init_params``. Defaults to an empty dict.
 
     Returns:
         A FitResult. Access the sampler through ``result.inference`` and
@@ -157,7 +161,7 @@ def fit_mcmc(
     fit_model = model if return_deterministic else block(model, hide_fn=_hide_deterministic)
 
     mcmc = MCMC(kernel_class(fit_model, **kernel_kwargs), **mcmc_kwargs)
-    mcmc.run(rng_key, responses, covariates)
+    mcmc.run(rng_key, responses, covariates, **(run_kwargs or {}))
 
     return _make_result(mcmc, model, responses, covariates)
 
