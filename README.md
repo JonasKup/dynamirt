@@ -26,7 +26,9 @@ dynamirt requires Python 3.10 or newer.
 python -m pip install dynamirt
 ```
 
-[Documentation](https://dynamirt.readthedocs.io/en/latest/)
+## Documentation
+
+https://dynamirt.readthedocs.io/
 
 ## Building a model
 
