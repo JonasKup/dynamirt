@@ -32,42 +32,10 @@ model = dynamirt(
 )
 
 covariates = {}
-idata, mcmc = fit_mcmc(model, responses, covariates)
+fit = fit_mcmc(model, responses, covariates)
+idata = fit.to_idata()
+mcmc = fit.inference
 ```
-
-### Longitudinal 2-PL MIRT model with HSGPs
-
-```python
-from dynamirt import HSGP, Linear, Sparsity, dynamirt, fit_svi
-
-covariates = {
-    "respondent_id": ...,
-    "time": ...,
-}
-
-intercept = Linear("respondent_mean", group_by="respondent_id")
-
-trajectory = HSGP(
-    name="trajectory",
-    predictors="time",
-    group_by="respondent_id",
-    kernel="Matern",
-    ell=1.5,  # assumes time is scaled and centered
-    m=30,  # number of basis functions
-    nu=3 / 2,  # smoothness of the Matern kernel
-)
-
-model = dynamirt(
-    model_type="2PL",
-    n_latent=2,
-    loadings=Sparsity(),
-    latent_fn=[intercept, trajectory],
-)
-
-idata, guide, svi_result = fit_svi(model, responses, covariates)
-```
-
-The API documentation is under development.
 
 ## Built with
 
