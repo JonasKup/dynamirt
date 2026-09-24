@@ -36,7 +36,7 @@ html_theme = 'sphinx_book_theme'
 html_static_path = ['_static']
 html_title = 'dynamirt'
 html_theme_options = {
-    "repository_url": "https://gitlab.git.nrw/jkupschus/dynamirt",
-    "repository_provider": "gitlab",
+    "repository_url": "https://github.com/JonasKup/dynamirt",
+    "repository_provider": "github",
     "use_repository_button": True,
 }

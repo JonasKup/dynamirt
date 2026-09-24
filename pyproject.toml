@@ -33,4 +33,4 @@ license = "Apache-2.0"
 license-files = ["LICEN[CS]E*"]
 
 [project.urls]
-Homepage = "https://gitlab.git.nrw/jkupschus/dynamirt"
+Homepage = "https://github.com/JonasKup/dynamirt"
