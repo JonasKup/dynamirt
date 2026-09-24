@@ -39,7 +39,7 @@ def calibration(
         n_bins: Number of equal-width bins spanning [0, 1].
 
     Returns:
-        Dataset with predicted_rate (*sample_dims, item, category, bin),
+        Dataset with predicted_rate ``(*sample_dims, item, category, bin)``,
         observed_rate and count (item, category, bin), and valid_category
         (item, category). Each category compares P(Y=k) against Y==k.
         Bin membership is fixed separately for each item and category using

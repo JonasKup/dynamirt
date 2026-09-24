@@ -224,7 +224,7 @@ def item_curves(
         latent: One or two latent coordinate labels to vary. Required for
             multidimensional models; other latent coordinates stay at zero.
         theta_range: Increasing (lower, upper) bounds, shared by grid axes.
-        n_points: Points per axis (a two-factor grid has n_points**2 points).
+        n_points: Points per axis (a two-factor grid has ``n_points**2`` points).
         posterior: Optional posterior Dataset or idata["posterior"] DataTree
             node, retaining all stochastic measurement parameters in model
             order. Defaults to result.to_idata()["posterior"]. Reuse this
@@ -233,7 +233,7 @@ def item_curves(
             the conversion default (500). Leave None for MCMC or posterior.
 
     Returns:
-        Dataset with probability (*sample_dims, point, item, category),
+        Dataset with probability ``(*sample_dims, point, item, category)``,
         theta (point, latent), and valid_category (item, category). Sampling
         dimensions and coordinate labels are retained. The varied_latent
         attribute records the grid axes in order. Invalid categories have
