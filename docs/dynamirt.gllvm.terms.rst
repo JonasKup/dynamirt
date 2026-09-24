@@ -4,6 +4,13 @@ dynamirt.gllvm.terms package
 Submodules
 ----------
 
+dynamirt.gllvm.terms.custom module
+----------------------------------
+
+.. automodule:: dynamirt.gllvm.terms.custom
+   :members:
+   :show-inheritance:
+
 dynamirt.gllvm.terms.continuous module
 --------------------------------------
 

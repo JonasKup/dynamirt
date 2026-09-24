@@ -12,6 +12,12 @@ Subpackages
 Submodules
 ----------
 
+dynamirt.gllvm.context module
+-----------------------------
+
+.. autoclass:: dynamirt.gllvm.context.ModelContext
+   :members:
+
 dynamirt.gllvm.families module
 ------------------------------
 

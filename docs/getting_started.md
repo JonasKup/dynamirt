@@ -1,0 +1,67 @@
+# Getting started
+
+## Installation
+
+dynamirt requires Python 3.10 or newer.
+
+```bash
+python -m pip install dynamirt
+```
+
+## Building a model
+
+`dynamirt()` builds a NumPyro model from a measurement model and a latent
+model. It returns a model callable, which you fit with `fit_mcmc` or `fit_svi`:
+
+```python
+from dynamirt import dynamirt, fit_mcmc, Confirmatory
+
+model = dynamirt(model_type="2PL", n_latent=2, loadings=Confirmatory(Q, positive=Q))
+fit = fit_mcmc(model, responses, covariates)
+idata = fit.to_idata()
+```
+
+`responses` is an `(n_obs, n_items)` array. Binary items are coded 0/1,
+ordinal items use categories `0, ..., n_cat - 1` and missing responses are
+`np.nan`. `covariates` is a dict of arrays with one value per row, such as
+respondent IDs or time points, and terms refer to these by name.
+
+Key arguments:
+
+`model_type`
+: The measurement model (see below). Defaults to `"2PL"`.
+
+`n_latent`
+: Number of latent dimensions. Defaults to 1.
+
+`loadings`
+: Structure of the item-by-latent loading matrix: `Full()`, `Fixed()`,
+  `Confirmatory(Q)` or `Sparsity()` (experimental). Defaults to `Full()`.
+  1PL and PCM always use `Fixed()`.
+
+`latent_fn`
+: A list of additive terms defining the latent scores, e.g. `Linear`,
+  `GRW`, `AR1`, `ExactGP`, `HSGP` or `CustomTerm`. If omitted, each row gets
+  an independent latent score.
+
+`DIF`
+: A list of terms that act directly on the items, to model differential item
+  functioning.
+
+`model_type_kwargs`
+: Extra options for the measurement model. Ordinal models need the number of
+  categories, e.g. `{"n_cat": 5}`.
+
+## Supported measurement models
+
+| `model_type` | Response | Model |
+|---|---|---|
+| `"1PL"` | Binary | Rasch model (loadings fixed to 1) |
+| `"2PL"` | Binary | Item intercepts and loadings |
+| `"3PL"` | Binary | 2PL with a lower asymptote (guessing) |
+| `"4PL"` | Binary | 3PL with an upper asymptote (slipping) |
+| `"GRM"` | Ordinal | Graded response model |
+| `"PCM"` | Ordinal | Partial credit model (loadings fixed to 1) |
+| `"GPCM"` | Ordinal | Generalized partial credit model |
+
+See the tutorials for complete static and longitudinal examples.

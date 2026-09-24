@@ -20,6 +20,13 @@ dynamirt.api module
    :show-inheritance:
    :undoc-members:
 
+dynamirt.diagnostics module
+---------------------------
+
+.. automodule:: dynamirt.diagnostics
+   :members:
+   :show-inheritance:
+
 dynamirt.fit module
 -------------------
 
@@ -27,6 +34,12 @@ dynamirt.fit module
    :members:
    :show-inheritance:
    :undoc-members:
+
+dynamirt.calibration_curves module
+-----------------------------------
+
+.. automodule:: dynamirt.calibration_curves
+   :members: calibration, plot_calibration
 
 dynamirt.loadings module
 ------------------------
