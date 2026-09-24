@@ -16,3 +16,6 @@ __pycache__/
 
 # Build artifacts
 dist/
+
+# Sphinx build output
+docs/_build/
