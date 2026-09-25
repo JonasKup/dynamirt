@@ -1,44 +1,9 @@
-dynamirt.gllvm.terms package
-============================
+:orphan:
 
-Submodules
-----------
+Latent term reference
+=====================
 
-dynamirt.gllvm.terms.custom module
-----------------------------------
+The API reference is organized by topic:
 
-.. automodule:: dynamirt.gllvm.terms.custom
-   :members:
-   :show-inheritance:
-
-dynamirt.gllvm.terms.continuous module
---------------------------------------
-
-.. automodule:: dynamirt.gllvm.terms.continuous
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
-dynamirt.gllvm.terms.discrete module
-------------------------------------
-
-.. automodule:: dynamirt.gllvm.terms.discrete
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
-dynamirt.gllvm.terms.linear module
-----------------------------------
-
-.. automodule:: dynamirt.gllvm.terms.linear
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
-Module contents
----------------
-
-.. automodule:: dynamirt.gllvm.terms
-   :members:
-   :show-inheritance:
-   :undoc-members:
+* :doc:`api/terms`
+* :doc:`api/custom`

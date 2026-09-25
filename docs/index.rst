@@ -26,7 +26,13 @@ Gaussian processes. Models are fitted with MCMC or SVI.
    tutorials/tutorial_NODE
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: API reference
 
-   modules
+   api/model
+   api/fitting
+   api/terms
+   api/loadings
+   api/parameters
+   api/diagnostics
+   api/custom

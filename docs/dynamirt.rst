@@ -1,66 +1,14 @@
-dynamirt package
-================
+:orphan:
 
-Subpackages
------------
+Public API
+==========
 
-.. toctree::
-   :maxdepth: 4
+The API reference is organized by topic:
 
-   dynamirt.gllvm
-
-Submodules
-----------
-
-dynamirt.api module
--------------------
-
-.. automodule:: dynamirt.api
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
-dynamirt.diagnostics module
----------------------------
-
-.. automodule:: dynamirt.diagnostics
-   :members:
-   :show-inheritance:
-
-dynamirt.fit module
--------------------
-
-.. automodule:: dynamirt.fit
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
-dynamirt.calibration_curves module
------------------------------------
-
-.. automodule:: dynamirt.calibration_curves
-   :members: calibration, plot_calibration
-
-dynamirt.loadings module
-------------------------
-
-.. automodule:: dynamirt.loadings
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
-dynamirt.terms module
----------------------
-
-.. automodule:: dynamirt.terms
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
-Module contents
----------------
-
-.. automodule:: dynamirt
-   :members:
-   :show-inheritance:
-   :undoc-members:
+* :doc:`api/model`
+* :doc:`api/fitting`
+* :doc:`api/terms`
+* :doc:`api/loadings`
+* :doc:`api/parameters`
+* :doc:`api/diagnostics`
+* :doc:`api/custom`
