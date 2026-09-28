@@ -37,7 +37,7 @@ def _pad_by_group(X, idx, n_groups):
     return padded, valid, slot
 
 @dataclass(frozen=True)
-class ExactGP:
+class GP:
     """Exact Gaussian process term for a gllvm regression.
 
     Computes ``f = L @ z`` where L is the Cholesky factor of the kernel
