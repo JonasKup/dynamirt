@@ -127,9 +127,10 @@ def dynamirt(
         **{f"{term.name}_latent": ["obs", "latent"] for term in latent_contribution},
         **{f"{term.name}_eta": ["obs", "item"] for term in full_rank},
     }
+    
+    # could be removed and recovered from partial keywords?
     model._dynamirt_n_latent = n_latent
-    # Baseline measurement terms and category counts for item-response curves.
-    model._dynamirt_baseline_terms = full_rank[:1] if model_type in _DICHOTOMOUS else []
+    # Category counts for item-response curves.
     model._dynamirt_n_cat = 2 if model_type in _DICHOTOMOUS else model_type_kwargs["n_cat"]
     
     return model

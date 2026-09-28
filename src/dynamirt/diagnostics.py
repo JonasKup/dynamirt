@@ -1,4 +1,4 @@
-"""Posterior plots and baseline item-response probabilities."""
+"""Posterior plots and conditional item-response probabilities."""
 
 from collections.abc import Mapping, Sequence
 
@@ -209,18 +209,23 @@ def plot_loadings(
 def item_curves(
     result: FitResult,
     *,
+    covariates: Mapping[str, object] | None = None,
     latent: str | int | Sequence[str | int] | None = None,
     theta_range: tuple[float, float] = (-3, 3),
     n_points: int = 100,
     posterior: xr.Dataset | xr.DataTree | None = None,
     num_samples: int | None = None,
 ) -> xr.Dataset:
-    """Evaluate baseline category probabilities on a one- or two-factor grid. 
+    """Evaluate conditional category probabilities on a one- or two-factor grid.
     I.e., get item characteristic curves/item response functions for a model
     with up to two latent dimensions.
 
     Args:
         result: FitResult from a model built with dynamirt.
+        covariates: Values required by the measurement model, including DIF.
+            Scalars broadcast across the theta grid; vectors follow its point
+            order. Use the fitted coding/scaling and group indices. Defaults
+            to an empty mapping; training covariates are not filled in.
         latent: One or two latent coordinate labels to vary. Required for
             multidimensional models; other latent coordinates stay at zero.
         theta_range: Increasing (lower, upper) bounds, shared by grid axes.
@@ -237,9 +242,12 @@ def item_curves(
         theta (point, latent), and valid_category (item, category). Sampling
         dimensions and coordinate labels are retained. The varied_latent
         attribute records the grid axes in order. Invalid categories have
-        probability zero. DIF contributions are excluded; binary item
-        intercepts are retained. These are conditional slices, not averages
-        over the other latent dimensions or training covariates.
+        probability zero. All original measurement terms, including DIF, are
+        evaluated at the supplied covariates. Latent terms are replaced by the
+        theta grid. These are conditional slices, not averages over the other
+        latent dimensions or training covariates. The supplied profile is not
+        stored in the output. DIF terms must support evaluation on this grid;
+        this does not provide GP conditioning at new inputs.
     """
     if posterior is None:
         posterior = result.to_idata(num_samples=num_samples)["posterior"]
@@ -281,9 +289,9 @@ def item_curves(
 
     def grid_model():
         result.model(
-            responses=None, covariates={}, n_obs=len(theta), n_var=n_items,
+            responses=None, covariates={} if covariates is None else covariates,
+            n_obs=len(theta), n_var=n_items,
             latent_regression=[grid_term],
-            full_rank_regression=result.model._dynamirt_baseline_terms,
         )
 
     key = jax.random.key(0)
@@ -331,7 +339,7 @@ def item_curves(
             )),
             "category": np.arange(n_cat),
         },
-        attrs={"varied_latent": selected, "DIF": "excluded"},
+        attrs={"varied_latent": selected},
     )
 
 
@@ -347,7 +355,7 @@ def plot_item_curves(
     mesh_kwargs: Mapping[str, object] | None = None,
     colorbar_kwargs: Mapping[str, object] | None = None,
 ) -> Axes:
-    """Plot one item's baseline response curves or a category heatmap.
+    """Plot one item's conditional response curves or a category heatmap.
 
     Args:
         curves: Dataset returned by item_curves.
