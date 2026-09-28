@@ -6,11 +6,6 @@ or ordinal item responses collected at irregular times, including ragged
 panel and EMA data where respondents have different numbers and schedules of
 observations.
 
-Models are assembled from two parts: a *measurement model* (item intercepts or
-thresholds, loadings, asymptotes and optional DIF) and a *latent model* made of
-additive terms such as linear effects, random walks, AR(1) processes and
-Gaussian processes. Models are fitted with MCMC or SVI.
-
 <table>
   <tr>
     <td><img src="imgs/simulated_item_responses.svg" width="400" alt="Item Response Pattern"></td>
