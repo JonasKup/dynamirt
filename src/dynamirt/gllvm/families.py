@@ -6,7 +6,7 @@ import jax.numpy as jnp
 import numpyro
 import numpyro.distributions as dist 
 
-from ._context import _Context
+from .context import ModelContext
 
 
 def Bernoulli() -> Callable:
@@ -17,7 +17,7 @@ def Bernoulli() -> Callable:
             ``family(eta, ctx) -> dist.Bernoulli`` where eta is the
             linear predictor on the logit scale.
     """
-    def family(eta: ArrayLike, ctx: _Context):
+    def family(eta: ArrayLike, ctx: ModelContext):
         return dist.Bernoulli(logits=eta)
     family.n_cat = 2
     return family
@@ -38,7 +38,7 @@ def Gaussian(sigma_prior: dist.Distribution | None=None) -> Callable:
     """
     sigma_prior = dist.HalfNormal(1) if sigma_prior is None else sigma_prior
     
-    def family(eta: ArrayLike, ctx: _Context):
+    def family(eta: ArrayLike, ctx: ModelContext):
         sigma = numpyro.sample("sigma", sigma_prior.expand((1, ctx.n_var)).to_event(2))
         return dist.Normal(eta, sigma)
     return family
@@ -61,7 +61,7 @@ def NegBinom(conc_prior: dist.Distribution | None=None) -> Callable:
     
     conc_prior = dist.HalfNormal(1) if conc_prior is None else conc_prior
 
-    def family(eta: ArrayLike, ctx: _Context):
+    def family(eta: ArrayLike, ctx: ModelContext):
         conc = numpyro.sample("concentration", conc_prior.expand((1, ctx.n_var)).to_event(2))
         return dist.NegativeBinomial2(jnp.exp(eta), conc)
     return family

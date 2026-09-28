@@ -10,7 +10,7 @@ from numbers import Integral
 import jax.numpy as jnp
 from jax.typing import ArrayLike
 
-from ._context import _Context
+from .context import ModelContext
 
 def q_matrix(factors, items):
     """Build a binary item-by-factor NumPy array for ``Confirmatory``.
@@ -54,7 +54,7 @@ def Fixed() -> Callable:
     Returns:
         A `loadings(ctx)` function that returns a (n_var, n_latent) array of ones.
     """
-    def loadings(ctx: _Context):
+    def loadings(ctx: ModelContext):
         
         return jnp.ones((ctx.n_var, ctx.n_latent))
     
@@ -101,7 +101,7 @@ def Confirmatory(
     free = ~pos
     n_free, n_pos = int(free.sum()), int(pos.sum())
 
-    def loadings(ctx: _Context):
+    def loadings(ctx: ModelContext):
         if Q.shape != (ctx.n_var, ctx.n_latent):
             raise ValueError("Q shape must match items and latents")
         discrimination = jnp.zeros((ctx.n_var, ctx.n_latent))
@@ -133,7 +133,7 @@ def Full(prior: dist.Distribution | None = None) -> Callable:
         sampled entrywise from `prior`.
     """
     prior = dist.Normal(0, 1) if prior is None else prior
-    def loadings(ctx: _Context):
+    def loadings(ctx: ModelContext):
         return numpyro.sample(
             "full", prior.expand((ctx.n_var, ctx.n_latent)).to_event(2)
         )
@@ -176,7 +176,7 @@ def Sparsity(tau0=1.0, slab_scale: float=1.0, slab_df: float=4.0) -> Callable:
         A `loadings(ctx)` function that returns the (n_var, n_latent)
         loading matrix
     """
-    def loadings(ctx: _Context):
+    def loadings(ctx: ModelContext):
         shape = (ctx.n_var, ctx.n_latent)
         
         c_sq = numpyro.sample("c_sq", dist.InverseGamma(slab_df / 2, slab_df * slab_scale**2 / 2))

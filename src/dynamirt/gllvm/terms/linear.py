@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Literal, Sequence
 
-from .._context import _Context
+from ..context import ModelContext
 from ..parameters import Param
 
 import numpyro
@@ -50,17 +50,17 @@ class Linear:
     corr: Literal[None, "predictors", "variables", "both"] = None
     coef: Param = Param(dist.Normal(0.0, 1.0), by_group="free", by_variable="free")
 
-    def __call__(self, ctx: _Context, n_vars: int):
+    def __call__(self, ctx: ModelContext, n_vars: int):
         # n_vars is either n_var or n_latents depending on whether Linear is called for eta or u regression
 
         # raise when group_by would become no-op
         if self.group_by is not None and self.coef.by_group == "shared":
             raise ValueError("group_by is set but coef is shared across groups")
 
-        X = ctx._design(self.predictors)
+        X = ctx.design(self.predictors)
         n_predictors = X.shape[1]
 
-        idx, n_groups = ctx._factorize(self.group_by)
+        idx, n_groups = ctx.factorize(self.group_by)
                    
         # parameter per 'stacked glm' or single parameter broadcast over glm stack
         # if not by_variable is "shared" this is another entry point for latent variables that are not subject to the loadings matrix

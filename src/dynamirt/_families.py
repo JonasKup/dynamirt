@@ -1,4 +1,4 @@
-from .gllvm._context import _Context
+from .gllvm.context import ModelContext
 from .gllvm.families import Bernoulli
 
 import jax
@@ -26,7 +26,7 @@ def _dichotomous(
     if model_type in ["1PL", "2PL"]:
         return Bernoulli()
 
-    def family(eta: ArrayLike, ctx: _Context):
+    def family(eta: ArrayLike, ctx: ModelContext):
         
 
         la = numpyro.sample("lower_asymptote", lower_asymptote_prior.expand((ctx.n_var,)).to_event(1))

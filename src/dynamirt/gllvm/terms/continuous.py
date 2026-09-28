@@ -12,7 +12,7 @@ from tinygp import kernels
 
 import numpy as np
 
-from .._context import _Context
+from ..context import ModelContext
 from ..parameters import Param
 
 #------------------------------------------ Exact GPs
@@ -74,11 +74,11 @@ class ExactGP:
     varies_over_variables: bool = True
     jitter: float = 1e-6
 
-    def __call__(self, ctx: _Context, n_vars: int):
+    def __call__(self, ctx: ModelContext, n_vars: int):
         n_target = n_vars if self.varies_over_variables else 1
         
-        group_idx, n_groups = ctx._factorize(self.group_by)
-        X = ctx._design(self.predictors)
+        group_idx, n_groups = ctx.factorize(self.group_by)
+        X = ctx.design(self.predictors)
         # pad ragged group points into common shape of n_max_points for efficient batching
         padded, valid, slot = _pad_by_group(X, group_idx, n_groups)
         n_points = padded.shape[1]
@@ -165,12 +165,12 @@ class HSGP:
         spd = jax.vmap(_spd)(alpha.reshape(-1), length.reshape(-1))
         return jnp.sqrt(spd).reshape(*alpha.shape, -1)
 
-    def __call__(self, ctx: _Context, n_vars: int):
+    def __call__(self, ctx: ModelContext, n_vars: int):
         
         if self.kernel not in ["Matern", "ExpSquared"]:
             raise ValueError(f"kernel must be 'Matern' or 'ExpSquared'. Got {self.kernel}.")
         
-        idx, n_groups = ctx._factorize(self.group_by)
+        idx, n_groups = ctx.factorize(self.group_by)
         n_target = n_vars if self.varies_over_variables else 1
         # check the raw covariates; X itself is traced during inference
         keys = [self.predictors] if isinstance(self.predictors, str) else list(self.predictors)
@@ -178,7 +178,7 @@ class HSGP:
             if np.any(np.abs(np.asarray(ctx.covariates[key])) > bound):
                 raise ValueError(f"HSGP {self.name!r}: inputs must lie within [-ell, ell]; "
                                  "center/scale the predictors or increase ell")
-        X = ctx._design(self.predictors)
+        X = ctx.design(self.predictors)
 
         alpha = self.amplitude(f"{self.name}_amplitude", n_groups, n_target)
         length = self.length(f"{self.name}_length", n_groups, n_target)

@@ -6,7 +6,7 @@ import numpy as np
 import jax.numpy as jnp
 from jax.typing import ArrayLike
 
-from ._context import _Context
+from .context import ModelContext
 from .loadings import Full
 
 
@@ -87,7 +87,7 @@ def gllvm(
                   "one_": np.array([1.0]),  # for intercepts
                   "row_": np.arange(n_obs)} # stand-in for ID column in scenarios w/o repeated measures where n_obs == n_site/respondent
         
-    ctx = _Context(
+    ctx = ModelContext(
         responses,
         covariates,
         n_obs, 

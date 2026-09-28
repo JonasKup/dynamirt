@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 
-from .._context import _Context
+from ..context import ModelContext
 from ..parameters import Param
 
 import numpyro
@@ -34,9 +34,9 @@ class GRW:
     varies_over_variables: bool = True
     scale: Param = Param(dist.HalfNormal(1))
 
-    def __call__(self, ctx: _Context, n_vars: int):
-        group_idx, n_groups = ctx._factorize(self.group_by)
-        t_idx, n_time = ctx._factorize(self.order_by)
+    def __call__(self, ctx: ModelContext, n_vars: int):
+        group_idx, n_groups = ctx.factorize(self.group_by)
+        t_idx, n_time = ctx.factorize(self.order_by)
         n_target = n_vars if self.varies_over_variables else 1
 
         sigma = self.scale(f"{self.name}_scale", n_groups, n_target)  # (n_groups, n_target)
@@ -76,9 +76,9 @@ class AR1:
     scale: Param = Param(dist.HalfNormal(1))
     phi: Param = Param(dist.Beta(3, 3))
 
-    def __call__(self, ctx: _Context, n_vars: int):
-        group_idx, n_groups = ctx._factorize(self.group_by)
-        t_idx, n_time = ctx._factorize(self.order_by)
+    def __call__(self, ctx: ModelContext, n_vars: int):
+        group_idx, n_groups = ctx.factorize(self.group_by)
+        t_idx, n_time = ctx.factorize(self.order_by)
         n_target = n_vars if self.varies_over_variables else 1
 
         phi = self.phi(f"{self.name}_phi", n_groups, n_target)       # (n_groups, n_target)

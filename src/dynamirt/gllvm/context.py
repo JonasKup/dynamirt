@@ -53,7 +53,3 @@ class ModelContext:
         keys = [predictors] if isinstance(predictors, str) else list(predictors)
         cols = [jnp.broadcast_to(jnp.asarray(self.covariates[k]).ravel(), (self.n_obs,)) for k in keys]
         return jnp.stack(cols, axis=-1)
-
-    # Compatibility for existing terms.
-    _factorize = factorize
-    _design = design
