@@ -41,7 +41,7 @@ Key arguments:
 
 `latent_fn`
 : A list of additive terms defining the latent scores, e.g. `Linear`,
-  `GRW`, `AR1`, `ExactGP`, `HSGP` or `CustomTerm`. If omitted, each row gets
+  `GRW`, `AR1`, `GP`, `HSGP` or `CustomTerm`. If omitted, each row gets
   an independent latent score.
 
 `DIF`
@@ -65,3 +65,32 @@ Key arguments:
 | `"GPCM"` | Ordinal | Generalized partial credit model |
 
 See the tutorials for complete static and longitudinal examples.
+
+## Integer-coded groups and time steps
+
+For `group_by` and the discrete-time `order_by` arguments of `GRW`/`AR1`,
+supply integer codes and declare each axis size once on the model:
+
+```python
+from dynamirt import Linear, GRW
+
+model = dynamirt(
+    index_sizes={"clinic": 12, "time_step": 20},
+    latent_fn=[GRW("trajectory", order_by="time_step", group_by="clinic")],
+    DIF=[Linear("clinic_dif", group_by="clinic", constraint="reference_coding")],
+)
+```
+
+Codes must lie in `0, ..., size - 1`. A scalar code broadcasts to all rows;
+subsets and unused levels are allowed without changing parameter dimensions.
+Reference coding always fixes code `0` to zero. `row_` and its size are supplied
+automatically, so ordinary observation-level residuals need no configuration.
+GP/HSGP predictors remain continuous; only their grouping covariates need codes.
+GRW/AR1 time codes represent equally spaced latent steps. Missing observation
+rows do not collapse those steps: the full configured trajectory is constructed.
+
+To encode labels, use `levels, codes = np.unique(labels, return_inverse=True)`
+in data preparation, then declare `index_sizes={"group": len(levels)}` and pass
+`codes` in `covariates["group"]`. Retain the same label-to-code mapping for later
+evaluation; do not re-encode a subset independently. Original labels can be
+kept in a separate covariate for plotting.

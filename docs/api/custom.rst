@@ -3,7 +3,7 @@ Custom models
 
 Define an additive contribution using NumPyro/JAX code with ``CustomTerm``.
 Its function receives a ``ModelContext`` containing data and dimensions.
-The context provides ``design`` and ``factorize`` helpers for covariates.
+The context provides ``design`` and ``index`` helpers for covariates.
 
 CustomTerm
 ----------
@@ -14,5 +14,5 @@ ModelContext
 ------------
 
 .. autoclass:: dynamirt.ModelContext
-   :members: design, factorize
+   :members: design, index
 

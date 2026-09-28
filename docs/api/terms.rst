@@ -20,10 +20,10 @@ AR1
 
 .. autoclass:: dynamirt.AR1
 
-ExactGP
--------
+GP
+--
 
-.. autoclass:: dynamirt.ExactGP
+.. autoclass:: dynamirt.GP
 
 HSGP
 ----
