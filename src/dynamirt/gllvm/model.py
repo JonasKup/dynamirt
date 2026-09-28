@@ -31,7 +31,8 @@ def gllvm(
     loadings: Callable | None =None,
     n_obs: int=None,
     n_var: int=None,
-    latent_site_name: str="u"
+    latent_site_name: str="u",
+    index_sizes: Mapping[str, int] | None =None,
     ):
     
     """Generalized linear latent variable model.
@@ -70,6 +71,9 @@ def gllvm(
             None.
         latent_site_name: Name of the NumPyro deterministic site that
             stores the latent scores u. Defaults to ``"u"``.
+        index_sizes: Fixed sizes of named integer-coded grouping and time
+            axes. Codes may select any subset of 0,...,size-1. The reserved
+            row_ axis is set automatically to n_obs.
     """
     
     if responses is None and (n_obs is None or n_var is None):
@@ -92,7 +96,8 @@ def gllvm(
         covariates,
         n_obs, 
         n_var, 
-        n_latent
+        n_latent,
+        index_sizes={**(index_sizes or {}), "row_": n_obs},
         ) # context to pass to subfunctions like term and family
     
     # full-rank regression (DIF under IRT)

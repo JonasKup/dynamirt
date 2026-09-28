@@ -55,8 +55,8 @@ class GP:
             that builds the kernel from a dict of sampled parameters.
         params: Mapping from parameter name to ``Param`` instance. Each
             entry is sampled and passed to `kernel`.
-        group_by: Optional covariate name giving a grouping factor. A
-            separate GP is drawn per level. None means one shared GP.
+        group_by: Optional integer-coded grouping covariate; its size must
+            be declared in index_sizes. A separate GP is drawn per level. None means one shared GP.
             Defaults to None.
         varies_over_variables: If True, an independent GP realisation is
             drawn for each response variable; if False, a single
@@ -77,7 +77,7 @@ class GP:
     def __call__(self, ctx: ModelContext, n_vars: int):
         n_target = n_vars if self.varies_over_variables else 1
         
-        group_idx, n_groups = ctx.factorize(self.group_by)
+        group_idx, n_groups = ctx.index(self.group_by)
         X = ctx.design(self.predictors)
         # pad ragged group points into common shape of n_max_points for efficient batching
         padded, valid, slot = _pad_by_group(X, group_idx, n_groups)
@@ -130,7 +130,8 @@ class HSGP:
             dimensions; a sequence specifies per-dimension counts.
         nu: Smoothness parameter for the Matérn kernel. Ignored when
             kernel is ``"ExpSquared"``. Defaults to 1.5.
-        group_by: Optional covariate name giving a grouping factor.
+        group_by: Optional integer-coded grouping covariate; its size must
+            be declared in index_sizes.
             Defaults to None.
         varies_over_variables: If True, an independent GP realisation is
             drawn for each response variable. Defaults to True.
@@ -170,7 +171,7 @@ class HSGP:
         if self.kernel not in ["Matern", "ExpSquared"]:
             raise ValueError(f"kernel must be 'Matern' or 'ExpSquared'. Got {self.kernel}.")
         
-        idx, n_groups = ctx.factorize(self.group_by)
+        idx, n_groups = ctx.index(self.group_by)
         n_target = n_vars if self.varies_over_variables else 1
         # check the raw covariates; X itself is traced during inference
         keys = [self.predictors] if isinstance(self.predictors, str) else list(self.predictors)

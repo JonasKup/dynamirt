@@ -7,7 +7,7 @@ from ._families import _dichotomous, _polytomous
 
 from functools import partial
 
-from typing import Sequence, Callable, Literal
+from typing import Sequence, Callable, Literal, Mapping
 
 _DICHOTOMOUS = ["1PL", "2PL", "3PL", "4PL"]
 _POLYTOMOUS = ["GRM", "PCM", "GPCM"]
@@ -20,7 +20,8 @@ def dynamirt(
     DIF: Sequence[Callable] | None =None,
     include_residuals: bool | None =None,
     corr: bool = False,
-    model_type_kwargs: dict | None =None
+    model_type_kwargs: dict | None =None,
+    index_sizes: Mapping[str, int] | None =None,
     ) -> Callable:
     
     """
@@ -56,6 +57,9 @@ def dynamirt(
             IRT family constructor for `model_type`. For polytomous models,
             ``n_cat`` is an integer or a sequence of counts in item-column
             order.
+        index_sizes: Fixed sizes for integer-coded grouping and discrete-time
+            covariates, e.g. {"clinic": 12, "time": 20}. Required for named
+            group_by/order_by axes; row_ is supplied automatically.
         
     Returns:
         A numpyro function with signature ``model(responses, covariates, ...)``
@@ -111,7 +115,8 @@ def dynamirt(
         latent_regression=latent_contribution,
         loadings=loadings,
         family=family_fn,
-        latent_site_name="theta"
+        latent_site_name="theta",
+        index_sizes={} if index_sizes is None else dict(index_sizes),
     )
 
     # ----------------- state for downstream analysis/ArviZ -----------------

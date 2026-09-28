@@ -14,15 +14,15 @@ class GRW:
     """Gaussian random walk term for a gllvm regression.
 
     At each time step the process increments by a Normal(0, sigma) draw.
-    Assumes equally spaced, fully observed time steps within each group.
+    Uses an equally spaced latent time grid; observation rows may omit steps.
 
     Attributes:
         name: Sample-site prefix. The cumulative walk is stored under a
             deterministic site with this name.
-        order_by: Covariate name whose unique sorted values define the
-            time axis.
-        group_by: Optional covariate name giving a grouping factor. An
-            independent walk is drawn per level. Defaults to None.
+        order_by: Integer-coded time covariate indexing equally spaced steps.
+            Declare the full time-axis size in index_sizes.
+        group_by: Optional integer-coded grouping covariate; its size must
+            be declared in index_sizes. An independent walk is drawn per level. Defaults to None.
         varies_over_variables: If True, an independent walk is drawn for
             each response variable. Defaults to True.
         scale: ``Param`` for the innovation standard deviation sigma.
@@ -35,8 +35,8 @@ class GRW:
     scale: Param = Param(dist.HalfNormal(1))
 
     def __call__(self, ctx: ModelContext, n_vars: int):
-        group_idx, n_groups = ctx.factorize(self.group_by)
-        t_idx, n_time = ctx.factorize(self.order_by)
+        group_idx, n_groups = ctx.index(self.group_by)
+        t_idx, n_time = ctx.index(self.order_by)
         n_target = n_vars if self.varies_over_variables else 1
 
         sigma = self.scale(f"{self.name}_scale", n_groups, n_target)  # (n_groups, n_target)
@@ -52,15 +52,15 @@ class AR1:
     The process is initialised at its stationary marginal standard
     deviation ``sigma / sqrt(1 - phi^2)`` so that variance is constant
     across time rather than warming up from zero.
-    Assumes equally spaced, fully observed time steps within each group.
+    Uses an equally spaced latent time grid; observation rows may omit steps.
 
     Attributes:
         name: Sample-site prefix. The AR(1) trajectory is stored under
             a deterministic site with this name.
-        order_by: Covariate name whose unique sorted values define the
-            time axis.
-        group_by: Optional covariate name giving a grouping factor. An
-            independent process is drawn per level. Defaults to None.
+        order_by: Integer-coded time covariate indexing equally spaced steps.
+            Declare the full time-axis size in index_sizes.
+        group_by: Optional integer-coded grouping covariate; its size must
+            be declared in index_sizes. An independent process is drawn per level. Defaults to None.
         varies_over_variables: If True, an independent process is drawn
             for each response variable. Defaults to True.
         scale: ``Param`` for the innovation standard deviation sigma.
@@ -77,8 +77,8 @@ class AR1:
     phi: Param = Param(dist.Beta(3, 3))
 
     def __call__(self, ctx: ModelContext, n_vars: int):
-        group_idx, n_groups = ctx.factorize(self.group_by)
-        t_idx, n_time = ctx.factorize(self.order_by)
+        group_idx, n_groups = ctx.index(self.group_by)
+        t_idx, n_time = ctx.index(self.order_by)
         n_target = n_vars if self.varies_over_variables else 1
 
         phi = self.phi(f"{self.name}_phi", n_groups, n_target)       # (n_groups, n_target)

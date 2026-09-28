@@ -25,10 +25,10 @@ class Linear:
             stored as a deterministic site under this name.
         predictors: Covariate name or sequence of names to regress on.
             Defaults to ``"one_"`` which specifies an intercept.
-        group_by: Optional covariate name giving a grouping factor. A
-            separate coefficient vector is drawn per level. Defaults to
+        group_by: Optional integer-coded grouping covariate; its size must
+            be declared in index_sizes. A separate coefficient vector is drawn per level. Defaults to
             None (single level).
-        constraint: ``"reference_coding"`` fixes the first group level's
+        constraint: ``"reference_coding"`` fixes group code zero's
             coefficients to zero. Defaults to None.
         corr: Axis along which to introduce LKJ-Cholesky correlations
             among coefficients. ``"predictors"`` correlates across
@@ -60,7 +60,7 @@ class Linear:
         X = ctx.design(self.predictors)
         n_predictors = X.shape[1]
 
-        idx, n_groups = ctx.factorize(self.group_by)
+        idx, n_groups = ctx.index(self.group_by)
                    
         # parameter per 'stacked glm' or single parameter broadcast over glm stack
         # if not by_variable is "shared" this is another entry point for latent variables that are not subject to the loadings matrix

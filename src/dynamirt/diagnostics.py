@@ -216,7 +216,7 @@ def item_curves(
     num_samples: int | None = None,
 ) -> xr.Dataset:
     """Evaluate baseline category probabilities on a one- or two-factor grid. 
-    I.e. get item characteristic curves/item response functions for a model
+    I.e., get item characteristic curves/item response functions for a model
     with up to two latent dimensions.
 
     Args:
