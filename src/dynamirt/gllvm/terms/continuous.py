@@ -15,8 +15,6 @@ import numpy as np
 from .._context import _Context
 from ..parameters import Param
 
-# To do: Predictive
-
 #------------------------------------------ Exact GPs
 
 def _pad_by_group(X, idx, n_groups):
@@ -79,13 +77,12 @@ class ExactGP:
     def __call__(self, ctx: _Context, n_vars: int):
         n_target = n_vars if self.varies_over_variables else 1
         
-        # use train set covariates if we're doing prediction
-        group_idx, n_groups = ctx._factorize(self.group_by, use_train=ctx.is_predictive)
-        X = ctx._design(self.predictors, use_train=ctx.is_predictive)
+        group_idx, n_groups = ctx._factorize(self.group_by)
+        X = ctx._design(self.predictors)
         # pad ragged group points into common shape of n_max_points for efficient batching
-        padded_train, valid_train, slot = _pad_by_group(X, group_idx, n_groups)
-        n_train_pts = padded_train.shape[1]
-        identity = jnp.eye(n_train_pts)
+        padded, valid, slot = _pad_by_group(X, group_idx, n_groups)
+        n_points = padded.shape[1]
+        identity = jnp.eye(n_points)
 
         # special handling for case in which no parameters vary over any variables -> no need to vmap over variables
         n_kernels = n_target if any(q.by_variable != "shared" for q in self.params.values()) else 1
@@ -93,7 +90,7 @@ class ExactGP:
         kernel_params = {k: q(f"{self.name}_{k}", n_groups, n_kernels) for k, q in self.params.items()} # (n_groups, n_kernels)
 
         # GP draws. Multiplied with kernel Cholesky
-        z = numpyro.sample(f"{self.name}_z", dist.Normal(0, 1).expand((n_train_pts, n_groups, n_target)).to_event(3))
+        z = numpyro.sample(f"{self.name}_z", dist.Normal(0, 1).expand((n_points, n_groups, n_target)).to_event(3))
 
         def cholesky(kernel_params, padded_input, valid):
             covariance = self.kernel(kernel_params)(padded_input, padded_input)
@@ -101,72 +98,15 @@ class ExactGP:
             return jnp.linalg.cholesky(covariance + self.jitter * identity) # jitter but no measurement noise because we're latent
 
         # vmap over groups (outer) and kernels/variables (inner)
-        L_train = jax.vmap(jax.vmap(cholesky, (0, None, None)))(kernel_params, padded_train, valid_train) # (n_groups, n_kernels, n_points, n_points)
+        L = jax.vmap(jax.vmap(cholesky, (0, None, None)))(kernel_params, padded, valid) # (n_groups, n_kernels, n_points, n_points)
 
-        #spec = "gts,sgv->tgv" if n_kernels == 1 else "gvts,sgv->tgv"
-        #f = jnp.einsum(spec, L[:, 0] if n_kernels == 1 else L, z)
-        f_train = jnp.einsum("gvts,sgv->tgv", L_train, z)
+        f = jnp.einsum("gvts,sgv->tgv", L, z)
         
-        numpyro.deterministic(self.name, f_train)       # (n_points, n_groups, n_target)
+        numpyro.deterministic(self.name, f)       # (n_points, n_groups, n_target)
         
-        if not ctx.is_predictive:
-            return f_train[slot, group_idx]                     # (n_obs, n_target)
-    
-        # --- predictive branch: GP conditional f* | f_train ---
-        test_idx, _ = ctx._factorize(self.group_by, use_train=False)
-        X_test = ctx._design(self.predictors, use_train=False)
-        padded_test, valid_test, slot_test = _pad_by_group(X_test, test_idx, n_groups)
-        n_test_pts = padded_test.shape[1]
-        I_test = jnp.eye(n_test_pts)
+        return f[slot, group_idx]                     # (n_obs, n_target)
 
-        # fresh standard-normal draws for the conditional (sampled from prior during Predictive)
-        z_star = numpyro.sample(f"{self.name}_z_star",
-            dist.Normal(0, 1).expand((n_test_pts, n_groups, n_target)).to_event(3))
 
-        # broadcast shared kernel to n_target so vmap axes are uniform
-        L_bc = jnp.broadcast_to(L_train, (n_groups, n_target, n_train_pts, n_train_pts))
-        kp_bc = {k: jnp.broadcast_to(v, (n_groups, n_target)) for k, v in kernel_params.items()}
-
-        def gp_conditional(kp, L_tr, f_tr, x_tr, v_tr, x_te, v_te, z_te):
-            """Conditional for a single (group, variable) slice."""
-            kern = self.kernel(kp)
-            K_cross = kern(x_te, x_tr)                                     # (n_test, n_train)
-            K_test  = kern(x_te, x_te)                                     # (n_test, n_test)
-            K_cross = jnp.where(v_te[:, None] & v_tr[None, :], K_cross, 0.0)
-            K_test  = jnp.where(v_te[:, None] & v_te[None, :], K_test, I_test)
-
-            # conditional mean: K_cross @ K_train^{-1} @ f_train
-            alpha = jax.scipy.linalg.cho_solve((L_tr, True), f_tr)
-            mean = K_cross @ alpha
-
-            # conditional covariance: K_test - K_cross @ K_train^{-1} @ K_cross^T
-            w = jax.scipy.linalg.solve_triangular(L_tr, K_cross.T, lower=True)
-            cond_cov = K_test - w.T @ w + self.jitter * I_test
-            L_cond = jnp.linalg.cholesky(cond_cov)
-
-            return mean + L_cond @ z_te                                    # reparameterized sample
-
-        kp_axes = {k: 0 for k in kp_bc}
-        f_tr_gv    = f_train.transpose(1, 2, 0)                            # (n_groups, n_target, n_train_pts)
-        z_star_gv  = z_star.transpose(1, 2, 0)                             # (n_groups, n_target, n_test_pts)
-
-        # inner vmap: over variables/kernels; outer vmap: over groups
-        f_star = jax.vmap(jax.vmap(gp_conditional,
-            in_axes=(kp_axes, 0, 0, None, None, None, None, 0)),
-            in_axes=(kp_axes, 0, 0, 0, 0, 0, 0, 0))(
-            kp_bc, L_bc, f_tr_gv,
-            padded_train, valid_train,
-            padded_test, valid_test,
-            z_star_gv
-        )                                                                   # (n_groups, n_target, n_test_pts)
-
-        f_star = f_star.transpose(2, 0, 1)                                  # (n_test_pts, n_groups, n_target)
-        numpyro.deterministic(f"{self.name}_star", f_star)
-
-        return f_star[slot_test, test_idx]                                  # (n_obs_test, n_target)        
-        
-
-        
 #------------------------------ HSGPs
 # hsgp adapted from https://num.pyro.ai/en/stable/_modules/numpyro/contrib/hsgp/approximation.html
 @dataclass(frozen=True)

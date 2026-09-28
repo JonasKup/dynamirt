@@ -31,8 +31,6 @@ def gllvm(
     loadings: Callable | None =None,
     n_obs: int=None,
     n_var: int=None,
-    train_covariates: Mapping[str, ArrayLike]=None,
-    train_obs: int=None,
     latent_site_name: str="u"
     ):
     
@@ -70,10 +68,6 @@ def gllvm(
         n_obs: Number of observations. Required when responses is None.
         n_var: Number of response variables. Required when responses is
             None.
-        train_covariates: Covariates used for fitting the model.
-            Only required when using Predictive with ExactGPs.
-        train_obs: Number of observations when fitting the model.
-            Only required when using Predictive with ExactGPs.
         latent_site_name: Name of the NumPyro deterministic site that
             stores the latent scores u. Defaults to ``"u"``.
     """
@@ -93,24 +87,12 @@ def gllvm(
                   "one_": np.array([1.0]),  # for intercepts
                   "row_": np.arange(n_obs)} # stand-in for ID column in scenarios w/o repeated measures where n_obs == n_site/respondent
         
-    if train_covariates is not None:
-        train_covariates = {
-            **train_covariates,
-            "one_": np.array([1.0]),
-            "row_": np.arange(train_obs),
-        }
-    
-    is_predictive = train_covariates is not None
-    
     ctx = _Context(
         responses,
         covariates,
         n_obs, 
         n_var, 
-        n_latent,
-        is_predictive,
-        train_covariates,
-        train_obs
+        n_latent
         ) # context to pass to subfunctions like term and family
     
     # full-rank regression (DIF under IRT)
