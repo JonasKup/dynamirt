@@ -18,7 +18,7 @@ requires-python = ">=3.10"
 dependencies = [
     "numpy",
     "jax",
-    "numpyro",
+    "numpyro>=0.22",
     "arviz>=1",
     "matplotlib",
     "tinygp",

@@ -106,9 +106,10 @@ def _polytomous(
                 logits = jnp.cumsum(
                     jnp.pad(eta[..., None] - d, ((0, 0), (0, 0), (1, 0))), axis=-1
                 )
-            return dist.CategoricalLogits(
-                jnp.where(categories < counts[:, None], logits, -jnp.inf)
-            )
+            # Structural zeros are valid probabilities, but -inf is not a
+            # valid CategoricalLogits parameter under argument validation.
+            masked_logits = jnp.where(categories < counts[:, None], logits, -jnp.inf)
+            return dist.Categorical(probs=jax.nn.softmax(masked_logits, axis=-1))
 
         if model_type == "GRM":
             base = dist.Normal(
