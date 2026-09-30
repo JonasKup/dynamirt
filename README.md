@@ -1,9 +1,9 @@
 # dynamirt 🧨
 
-**dynamirt** is a Python/NumPyro package for static and longitudinal
+**dynamirt** is a Python/NumPyro package for Bayesian static and longitudinal
 multidimensional item response theory (MIRT). It is built for repeated binary
 or ordinal item responses collected at irregular times, including ragged
-panel and EMA data where respondents have different numbers and schedules of
+panel and ecological momentary assessment (EMA) data where respondents have different numbers and schedules of
 observations.
 
 <table>
