@@ -15,13 +15,13 @@ from typing import Literal
 def _dichotomous(
     model_type: Literal["1PL", "2PL", "3PL", "4PL"],
     lower_asymptote_prior: dist.Distribution = None,
-    upper_asymptote_prior: dist.Distribution = None
+    upper_asymptote_gap_prior: dist.Distribution = None
     ):
     
     """Compute likelihood for 1PL, 2PL, 3PL, 4PL models"""
     
     lower_asymptote_prior = dist.Beta(2, 8) if lower_asymptote_prior is None else lower_asymptote_prior
-    upper_asymptote_prior = dist.Beta(8, 2) if upper_asymptote_prior is None else upper_asymptote_prior
+    upper_asymptote_gap_prior = dist.Beta(8, 2) if upper_asymptote_gap_prior is None else upper_asymptote_gap_prior
 
     if model_type in ["1PL", "2PL"]:
         return Bernoulli()
@@ -33,7 +33,7 @@ def _dichotomous(
 
         if model_type == "4PL":
             # sample gap between ua and la so la > ua can never happen
-            gap = numpyro.sample("asymptote_gap", upper_asymptote_prior.expand((ctx.n_var,)).to_event(1))
+            gap = numpyro.sample("asymptote_gap", upper_asymptote_gap_prior.expand((ctx.n_var,)).to_event(1))
             ua = numpyro.deterministic("upper_asymptote", la + (1.0 - la) * gap)
         else:
             ua = 1.0
