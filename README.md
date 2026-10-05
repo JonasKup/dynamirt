@@ -1,7 +1,10 @@
 # dynamirt 🧨
 
 **dynamirt** is a Python/NumPyro package for Bayesian static and longitudinal
-multidimensional item response theory (MIRT). It is built for repeated binary
+multidimensional [item response theory](https://en.wikipedia.org/wiki/Item_response_theory) (MIRT). 
+It provides an interface to the most common IRT measurement models and lets you freely specify the functional 
+form of the latent trait. 
+The built-ins (GPs, HSGPs) make it heavily geared toward repeated binary
 or ordinal item responses collected at irregular times, including ragged
 panel and ecological momentary assessment (EMA) data where respondents have different numbers and schedules of
 observations.
@@ -20,6 +23,9 @@ dynamirt requires Python 3.10 or newer.
 ```bash
 python -m pip install dynamirt
 ```
+
+If you want to use dynamirt on GPU you need to install it into an environment with [GPU-enabled JAX](https://docs.jax.dev/en/latest/installation.html).
+Otherwise the default CPU-only JAX will be installed.
 
 ## Documentation
 
