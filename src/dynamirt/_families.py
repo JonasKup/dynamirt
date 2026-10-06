@@ -8,7 +8,6 @@ from jax.typing import ArrayLike
 
 import numpyro
 import numpyro.distributions as dist
-from numpyro.distributions.transforms import OrderedTransform
 
 from typing import Literal
 
@@ -46,31 +45,47 @@ def _dichotomous(
     family.n_cat = 2
     return family
 
-# prior naming needs to be cleared up.
-# potentially separate GRM and GPCM
+def _grm_cutpoints(probabilities):
+    # logit(cumulative probability), using tail sums to avoid rounding to one.
+    below = jnp.cumsum(probabilities, axis=-1)[..., :-1]
+    above = jnp.cumsum(probabilities[..., ::-1], axis=-1)[..., ::-1][..., 1:]
+    return jnp.log(below) - jnp.log(above)
+
+
 def _polytomous(
     model_type, 
     n_cat, 
     prior=None, 
-    loc_prior=None, 
-    gap_prior=None):
+    alpha=1.0):
     
     """Compute likelihood for GRM, PCM, GPCM models with a shared or per-item category count.
 
-    Per-item counts use compact raw parameters and zero-padded deterministic
-    cutpoints/steps; only the first n_cat[j] - 1 entries of item j are valid.
+    GRM baseline probabilities at predictor zero have a Dirichlet(alpha) prior.
+    alpha is a positive scalar or a vector of length max(n_cat); shorter items
+    use its first n_cat[j] entries. Cutpoints are logits of cumulative probabilities.
+    prior controls PCM/GPCM steps. Per-item cutpoints/steps are zero-padded;
+    only the first n_cat[j] - 1 entries of item j are valid.
     """
     
     prior = dist.Normal(0, 1) if prior is None else prior
-    loc_prior = dist.Normal(0, 3) if loc_prior is None else loc_prior
-    gap_prior = dist.Normal(0, 0.5) if gap_prior is None else gap_prior
 
     counts = np.asarray(n_cat)
+    
     if (counts.ndim > 1 or counts.size == 0
             or counts.dtype.kind not in "iu" or np.any(counts < 2)):
         raise ValueError("n_cat must contain integers >= 2")
+    
     if counts.ndim == 0:
         n_cat = int(counts)
+        
+    if model_type == "GRM":
+        concentration = np.asarray(alpha)
+        if (concentration.ndim > 1
+                or (concentration.ndim == 1 and concentration.shape != (int(counts.max()),))
+                or not np.all(np.isfinite(concentration)) or np.any(concentration <= 0)):
+            raise ValueError("alpha must be a positive scalar or a vector of length max(n_cat)")
+        concentration = jnp.broadcast_to(jnp.asarray(concentration, dtype=float), (int(counts.max()),))
+        
     if counts.ndim:
         max_cat = int(counts.max())
         valid = np.arange(max_cat - 1) < counts[:, None] - 1
@@ -82,17 +97,21 @@ def _polytomous(
             raise ValueError("n_cat must have one count per item")
         if counts.ndim:
             if model_type == "GRM":
-                base = dist.Normal(
-                    jnp.where(threshold == 0, loc_prior.loc, gap_prior.loc),
-                    jnp.where(threshold == 0, loc_prior.scale, gap_prior.scale),
-                )
-                raw = numpyro.sample("cutpoints_raw", base.to_event(1))
-                padded = jnp.zeros(valid.shape).at[item, threshold].set(raw)
-                c = OrderedTransform()(padded)
-                numpyro.deterministic("cutpoints", jnp.where(valid, c, 0.0))
+                c = jnp.zeros(valid.shape)
+                for count in np.unique(counts):
+                    rows = np.flatnonzero(counts == count)
+                    p = numpyro.sample(
+                        f"baseline_category_probs_{count}",
+                        dist.Dirichlet(concentration[:count]).expand((len(rows),)).to_event(1),
+                    )
+                    c = c.at[rows, :count - 1].set(_grm_cutpoints(p))
+                numpyro.deterministic("cutpoints", c)
+                last = c[jnp.arange(ctx.n_var), counts - 2]
+                # OrderedLogistic needs ordered filler thresholds, even though
+                # their categories are subsequently masked out.
+                c = jnp.where(valid, c, last[:, None] + jnp.arange(max_cat - 1))
                 logits = dist.OrderedLogistic(eta, c).logits
                 # The final valid category includes the entire upper tail.
-                last = c[jnp.arange(ctx.n_var), counts - 2]
                 logits = jnp.where(
                     categories == counts[:, None] - 1,
                     jax.nn.log_sigmoid(eta - last)[..., None],
@@ -108,18 +127,16 @@ def _polytomous(
                 )
             # Structural zeros are valid probabilities, but -inf is not a
             # valid CategoricalLogits parameter under argument validation.
+            # fix is to hand probs instead of logits to dist.Categorical
             masked_logits = jnp.where(categories < counts[:, None], logits, -jnp.inf)
             return dist.Categorical(probs=jax.nn.softmax(masked_logits, axis=-1))
 
         if model_type == "GRM":
-            base = dist.Normal(
-                jnp.concatenate([jnp.full((ctx.n_var, 1), loc_prior.loc),
-                                 jnp.full((ctx.n_var, n_cat - 2), gap_prior.loc)], -1),
-                jnp.concatenate([jnp.full((ctx.n_var, 1), loc_prior.scale),
-                                 jnp.full((ctx.n_var, n_cat - 2), gap_prior.scale)], -1),
-            ).to_event(1)
-            c = numpyro.sample("cutpoints",
-                               dist.TransformedDistribution(base, OrderedTransform()).to_event(1))
+            p = numpyro.sample(
+                "baseline_category_probs",
+                dist.Dirichlet(concentration).expand((ctx.n_var,)).to_event(1),
+            )
+            c = numpyro.deterministic("cutpoints", _grm_cutpoints(p))
             return dist.OrderedLogistic(eta, c)
         
         base = prior.expand((ctx.n_var, n_cat - 1)).to_event(1)
