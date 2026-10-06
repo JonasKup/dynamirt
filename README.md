@@ -3,7 +3,7 @@
 **dynamirt** is a Python/NumPyro package for Bayesian static and longitudinal
 multidimensional [item response theory](https://en.wikipedia.org/wiki/Item_response_theory) (MIRT). 
 It provides an interface to the most common IRT measurement models and lets you freely specify the functional 
-form of the latent trait. 
+form of the latent construct. 
 The built-ins (GPs, HSGPs) make it heavily geared toward repeated binary
 or ordinal item responses collected at irregular times, including ragged
 panel and ecological momentary assessment (EMA) data where respondents have different numbers and schedules of
@@ -25,7 +25,7 @@ python -m pip install dynamirt
 ```
 
 If you want to use dynamirt on GPU you need to install it into an environment with [GPU-enabled JAX](https://docs.jax.dev/en/latest/installation.html).
-Otherwise the default CPU-only JAX will be installed.
+Otherwise, the default CPU-only JAX will be installed.
 
 ## Documentation
 
@@ -43,6 +43,8 @@ model = dynamirt(model_type="2PL", n_latent=2, loadings=Confirmatory(Q, positive
 fit = fit_mcmc(model, responses, covariates)
 idata = fit.to_idata()
 ```
+
+Please note that dynamirt is work in progress and there might be minor breaking API changes before a 1.0 release.
 
 ## Supported measurement models
 
