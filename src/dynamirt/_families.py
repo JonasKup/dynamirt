@@ -132,10 +132,10 @@ def _grm(n_cat, *, alpha=1.0):
 def _partial_credit(n_cat, *, step_prior=None):
     """PCM/GPCM likelihood; the model builder selects fixed/free loadings.
 
-    step_prior defaults to Normal(0, 1). Per-item steps are zero-padded;
+    step_prior defaults to Normal(0, 2). Per-item steps are zero-padded;
     only the first n_cat[j] - 1 entries of item j are valid.
     """
-    step_prior = dist.Normal(0, 1) if step_prior is None else step_prior
+    step_prior = dist.Normal(0, 2) if step_prior is None else step_prior
     counts, max_cat, valid, item, threshold = _category_layout(n_cat)
 
     def family(eta, ctx):
