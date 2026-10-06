@@ -3,14 +3,13 @@ from .gllvm.terms.linear import Linear
 
 from .gllvm.loadings import Full, Fixed
 
-from ._families import _dichotomous, _polytomous
+from ._families import _dichotomous, _grm, _partial_credit
 
 from functools import partial
 
 from typing import Sequence, Callable, Literal, Mapping
 
 _DICHOTOMOUS = ["1PL", "2PL", "3PL", "4PL"]
-_POLYTOMOUS = ["GRM", "PCM", "GPCM"]
 
 def dynamirt(
     model_type: Literal["1PL", "2PL", "3PL", "4PL", "GRM", "PCM", "GPCM"]="2PL",
@@ -101,10 +100,13 @@ def dynamirt(
         # generate item intercept for dichotomous models
         full_rank = [Linear("item_intercept", predictors="one_"), *DIF]
         family_fn = _dichotomous(model_type, **model_type_kwargs)
-    elif model_type in _POLYTOMOUS:
+    elif model_type == "GRM":
+        full_rank = [*DIF]
+        family_fn = _grm(**model_type_kwargs)
+    elif model_type in ["PCM", "GPCM"]:
         # polytomous models create their own intercepts in their family_fn
         full_rank = [*DIF]
-        family_fn = _polytomous(model_type, **model_type_kwargs)
+        family_fn = _partial_credit(**model_type_kwargs)
     else:
         raise ValueError(f"Unkown model type {model_type}")    
     
