@@ -19,10 +19,13 @@ class Linear:
     Contributes an array of shape (n_obs, n_target) where n_target is the
     number of response variables (full-rank predictor) or the number of
     latent dimensions (reduced-rank predictor).
+    
+    The assembled coefficient tensor is stored locally as ``coef`` 
+    and its input draw as ``coef.raw``.
 
     Attributes:
-        name: Sample-site prefix. The assembled coefficient tensor is
-            stored as a deterministic site under this name.
+        name: Term identifier. The model scopes local sites under
+            ``latent.<name>`` or ``item.<name>``.
         predictors: Covariate name or sequence of names to regress on.
             Defaults to ``"one_"`` which specifies an intercept.
         group_by: Optional integer-coded grouping covariate; its size must
@@ -70,27 +73,27 @@ class Linear:
         n_free = n_groups - 1 if self.constraint == "reference_coding" else n_groups
         
         # sample the raw parameter, then correlate, then apply partial pooling
-        coef = self.coef.sample_raw(f"{self.name}_raw", n_free, n_target, (n_predictors,))
+        coef = self.coef.sample_raw("coef.raw", n_free, n_target, (n_predictors,))
 
         # b = group_by-level, v = variable/latent, o = over
         if self.corr == "predictors" and n_predictors > 1:
-            L = numpyro.sample(f"{self.name}_L", dist.LKJCholesky(n_predictors, 1))
+            L = numpyro.sample("correlation_cholesky", dist.LKJCholesky(n_predictors, 1))
             coef = jnp.einsum("bvo,po->bvp", coef, L)
         elif self.corr == "variables" and n_target > 1:
-            L = numpyro.sample(f"{self.name}_L", dist.LKJCholesky(n_target, 1))
+            L = numpyro.sample("correlation_cholesky", dist.LKJCholesky(n_target, 1))
             coef = jnp.einsum("bvo,wv->bwo", coef, L)
         elif self.corr == "both" and n_target * n_predictors > 1:
             m = n_target * n_predictors
-            L = numpyro.sample(f"{self.name}_L", dist.LKJCholesky(m, 1))
+            L = numpyro.sample("correlation_cholesky", dist.LKJCholesky(m, 1))
             b = coef.shape[0]
             coef = (coef.reshape(b, m) @ L.T).reshape(b, n_target, n_predictors)
             
-        coef = self.coef.apply_partial_pooling(f"{self.name}_raw", coef, n_free, n_target, (n_predictors,))
+        coef = self.coef.apply_partial_pooling("coef", coef, n_free, n_target, (n_predictors,))
         coef = jnp.broadcast_to(coef, (n_free, n_target, n_predictors))
 
         if self.constraint == "reference_coding":
             coef = jnp.pad(coef, ((1, 0), (0, 0), (0, 0)))
 
-        coef = numpyro.deterministic(self.name, coef) # (n_groups, n_target, n_predictors)
+        coef = numpyro.deterministic("coef", coef) # (n_groups, n_target, n_predictors)
         # n = n_obs, o = over, v = variable/latent
         return jnp.einsum("no,nvo->nv", X, coef[idx]) # (n_obs, n_var)

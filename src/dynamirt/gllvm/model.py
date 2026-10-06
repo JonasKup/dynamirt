@@ -60,10 +60,12 @@ def gllvm(
         n_latent: Dimensionality of the latent space. Defaults to 1.
         full_rank_regression: List of term callables, each with signature
             ``term(ctx, n_var) -> (n_obs, n_var)``. Their outputs are
-            summed into the full-rank predictor eta.
+            summed into the full-rank predictor eta. Sites are scoped under
+            ``item.<term.name>``; the row-aligned output is ``contribution``.
         latent_regression: List of term callables, each with signature
             ``term(ctx, n_latent) -> (n_obs, n_latent)``. Their outputs
-            are summed into the latent scores u.
+            are summed into the latent scores u. Sites are scoped under
+            ``latent.<term.name>``; the row-aligned output is ``contribution``.
         loadings: A loading-matrix factory ``loadings(ctx) ->
             (n_var, n_latent)``. Defaults to ``Full()`` (unconstrained).
         n_obs: Number of observations. Required when responses is None.
@@ -104,18 +106,20 @@ def gllvm(
     eta = jnp.zeros((n_obs, n_var))
     if full_rank_regression is not None:
         for term in full_rank_regression:
-            contribution = term(ctx, n_var) # (n_obs, n_var)
+            with numpyro.handlers.scope(prefix=f"item.{term.name}", divider="."):
+                contribution = term(ctx, n_var) # (n_obs, n_var)
+                numpyro.deterministic("contribution", contribution)
             eta += contribution
-            numpyro.deterministic(f"{term.name}_eta", contribution) # makes term need to carry a name field
 
     
     # reduced-rank regression
     u = jnp.zeros((n_obs, n_latent))
     if latent_regression is not None:
         for term in latent_regression:
-            contribution = term(ctx, n_latent) # (n_obs, n_latent)
+            with numpyro.handlers.scope(prefix=f"latent.{term.name}", divider="."):
+                contribution = term(ctx, n_latent) # (n_obs, n_latent)
+                numpyro.deterministic("contribution", contribution)
             u += contribution
-            numpyro.deterministic(f"{term.name}_latent", contribution) # makes term need to carry a name field
     
     with numpyro.handlers.scope(prefix="loadings", divider="."):
         loadings_matrix = loadings(ctx) # (n_var, n_latent)
@@ -130,7 +134,8 @@ def gllvm(
     # likelihood based on user supplied family function
     # responses should always be float to carry nan
     # must be manually cast to int if the distribution returned by family_fn only has discrete support (e.g., ordinal models)
-    family_fn = family(mu, ctx)
+    with numpyro.handlers.scope(prefix="measurement", divider="."):
+        family_fn = family(mu, ctx)
     
     if responses is None:
         numpyro.sample("Y", family_fn)

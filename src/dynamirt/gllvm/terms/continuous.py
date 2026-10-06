@@ -47,9 +47,11 @@ class GP:
 
     Might need manual jax.config.update("jax_enable_x64", True) to prevent underflow.
 
+    The padded GP realization is stored locally as ``state`` and whitened draws as ``state.raw``.
+
     Attributes:
-        name: Sample-site prefix. The GP realisation is stored under
-            a deterministic site with this name.
+        name: Term identifier. The model scopes local sites under
+            ``latent.<name>`` or ``item.<name>``. 
         predictors: Covariate name(s) used as GP inputs.
         kernel: A callable ``kernel(params) -> tinygp.kernels.Kernel``
             that builds the kernel from a dict of sampled parameters.
@@ -87,10 +89,10 @@ class GP:
         # special handling for case in which no parameters vary over any variables -> no need to vmap over variables
         n_kernels = n_target if any(q.by_variable != "shared" for q in self.params.values()) else 1
         
-        kernel_params = {k: q(f"{self.name}_{k}", n_groups, n_kernels) for k, q in self.params.items()} # (n_groups, n_kernels)
+        kernel_params = {k: q(k, n_groups, n_kernels) for k, q in self.params.items()} # (n_groups, n_kernels)
 
         # GP draws. Multiplied with kernel Cholesky
-        z = numpyro.sample(f"{self.name}_z", dist.Normal(0, 1).expand((n_points, n_groups, n_target)).to_event(3))
+        z = numpyro.sample("state.raw", dist.Normal(0, 1).expand((n_points, n_groups, n_target)).to_event(3))
 
         def cholesky(kernel_params, padded_input, valid):
             covariance = self.kernel(kernel_params)(padded_input, padded_input)
@@ -102,7 +104,7 @@ class GP:
 
         f = jnp.einsum("gvts,sgv->tgv", L, z)
         
-        numpyro.deterministic(self.name, f)       # (n_points, n_groups, n_target)
+        numpyro.deterministic("state", f)       # (n_points, n_groups, n_target)
         
         return f[slot, group_idx]                     # (n_obs, n_target)
 
@@ -118,9 +120,12 @@ class HSGP:
     error for O(n * m) rather than O(n^3) cost. Supports Matérn and
     squared-exponential kernels.
 
+    Local parameter sites are ``amplitude``, ``lengthscale``, and ``basis_weights.raw``.
+
     Attributes:
-        name: Sample-site prefix. The GP realisation is stored under a
-            deterministic site with this name.
+        name: Term identifier. The model scopes local sites under
+            ``latent.<name>`` or ``item.<name>`` and records the row-aligned
+            realization as ``contribution``. 
         predictors: Covariate name(s) used as GP inputs.
         kernel: Kernel family, either ``"Matern"`` or ``"ExpSquared"``.
         ell: Boundary factor(s) for the Laplacian eigenfunctions. A
@@ -181,13 +186,13 @@ class HSGP:
                                  "center/scale the predictors or increase ell")
         X = ctx.design(self.predictors)
 
-        alpha = self.amplitude(f"{self.name}_amplitude", n_groups, n_target)
-        length = self.length(f"{self.name}_length", n_groups, n_target)
+        alpha = self.amplitude("amplitude", n_groups, n_target)
+        length = self.length("lengthscale", n_groups, n_target)
         
         phi = eigenfunctions(x=X, ell=self.ell, m=self.m) # (n_obs, n_basis)
         spd = self._sqrt_spectral_density(alpha**2, length, X.shape[-1])  # (n_groups, n_target, n_basis)
-        beta = numpyro.sample(f"{self.name}_beta", dist.Normal(0, 1).expand((n_groups, n_target, phi.shape[-1])).to_event(3))
+        beta = numpyro.sample("basis_weights.raw", dist.Normal(0, 1).expand((n_groups, n_target, phi.shape[-1])).to_event(3))
 
         weights = spd * beta
         f = jnp.einsum("nb,nvb->nv", phi, weights[idx])
-        return numpyro.deterministic(self.name, f)
+        return f

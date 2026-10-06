@@ -16,9 +16,12 @@ class GRW:
     At each time step the process increments by a Normal(0, sigma) draw.
     Uses an equally spaced latent time grid; observation rows may omit steps.
 
+    The complete grid is stored locally as ``state``; 
+    standardized draws are ``innovations.raw``.
+    
     Attributes:
-        name: Sample-site prefix. The cumulative walk is stored under a
-            deterministic site with this name.
+        name: Term identifier. The model scopes local sites under
+            ``latent.<name>`` or ``item.<name>``. 
         order_by: Integer-coded time covariate indexing equally spaced steps.
             Declare the full time-axis size in index_sizes.
         group_by: Optional integer-coded grouping covariate; its size must
@@ -39,10 +42,10 @@ class GRW:
         t_idx, n_time = ctx.index(self.order_by)
         n_target = n_vars if self.varies_over_variables else 1
 
-        sigma = self.scale(f"{self.name}_scale", n_groups, n_target)  # (n_groups, n_target)
-        z = numpyro.sample(f"{self.name}_innovations", dist.Normal(0, 1).expand((n_time, n_groups, n_target)).to_event(3))
+        sigma = self.scale("scale", n_groups, n_target)  # (n_groups, n_target)
+        z = numpyro.sample("innovations.raw", dist.Normal(0, 1).expand((n_time, n_groups, n_target)).to_event(3))
 
-        x = numpyro.deterministic(self.name, jnp.cumsum(sigma * z, axis=0))
+        x = numpyro.deterministic("state", jnp.cumsum(sigma * z, axis=0))
         return x[t_idx, group_idx]                                   # (n_obs, n_target)
 
 @dataclass(frozen=True)
@@ -54,9 +57,12 @@ class AR1:
     across time rather than warming up from zero.
     Uses an equally spaced latent time grid; observation rows may omit steps.
 
+    The complete grid is stored locally as ``state``; 
+    standardized draws are ``innovations.raw``.
+
     Attributes:
-        name: Sample-site prefix. The AR(1) trajectory is stored under
-            a deterministic site with this name.
+        name: Term identifier. The model scopes local sites under
+            ``latent.<name>`` or ``item.<name>``. 
         order_by: Integer-coded time covariate indexing equally spaced steps.
             Declare the full time-axis size in index_sizes.
         group_by: Optional integer-coded grouping covariate; its size must
@@ -81,9 +87,9 @@ class AR1:
         t_idx, n_time = ctx.index(self.order_by)
         n_target = n_vars if self.varies_over_variables else 1
 
-        phi = self.phi(f"{self.name}_phi", n_groups, n_target)       # (n_groups, n_target)
-        sigma = self.scale(f"{self.name}_scale", n_groups, n_target)
-        eps = sigma * numpyro.sample(f"{self.name}_innovations",dist.Normal(0, 1).expand((n_time, n_groups, n_target)).to_event(3))
+        phi = self.phi("phi", n_groups, n_target)       # (n_groups, n_target)
+        sigma = self.scale("scale", n_groups, n_target)
+        eps = sigma * numpyro.sample("innovations.raw",dist.Normal(0, 1).expand((n_time, n_groups, n_target)).to_event(3))
         x0 = eps[0] / jnp.sqrt(1 - phi ** 2)
 
         def step(carry, e):
@@ -91,5 +97,5 @@ class AR1:
             return carry, carry
 
         _, xs = jax.lax.scan(step, x0, eps[1:])
-        x = numpyro.deterministic(self.name, jnp.concatenate([x0[None], xs]))
+        x = numpyro.deterministic("state", jnp.concatenate([x0[None], xs]))
         return x[t_idx, group_idx]

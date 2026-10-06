@@ -62,8 +62,8 @@ class Param:
         # hyperparameters are shared along the pooled axis and follow the other axis's setting
         hyper_groups = n_groups if self.by_group == "free" else 1
         hyper_target = n_target if self.by_variable == "free" else 1
-        loc = pool.loc(f"{name}_loc", hyper_groups, hyper_target, trailing)
-        scale = pool.scale(f"{name}_scale", hyper_groups, hyper_target, trailing)
+        loc = pool.loc(f"{name}.loc", hyper_groups, hyper_target, trailing)
+        scale = pool.scale(f"{name}.scale", hyper_groups, hyper_target, trailing)
         unconstrained = loc + scale * raw
         return  pool.transform(unconstrained)
     

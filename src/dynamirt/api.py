@@ -1,6 +1,5 @@
 from .gllvm.model import gllvm
 from .gllvm.terms.linear import Linear
-from .gllvm.parameters import Param
 
 from .gllvm.loadings import Full, Fixed
 
@@ -45,10 +44,12 @@ def dynamirt(
         latent_terms: Sequence of latent-regression term callables (e.g.
             time-series terms, covariate effects on theta). If None
             and ``include_residuals`` is not explicitly False, an
-            i.i.d. residual term is added automatically.
+            i.i.d. residual term is added automatically. Sites are scoped under
+            ``latent.<term.name>``; the row-aligned output is ``contribution``.
         item_terms: Sequence of full-rank regression term callables added
             alongside the item intercepts to model differential item
-            functioning. Defaults to None.
+            functioning. Defaults to None. Sites are scoped under
+            ``item.<term.name>``; the row-aligned output is ``contribution``.
         include_residuals: Whether to append an i.i.d. residual latent
             term. Defaults to True when ``latent_terms`` is None,
             False otherwise.
@@ -103,13 +104,7 @@ def dynamirt(
         latent_contribution.append(Linear("residuals", predictors="one_", group_by="row_", corr="variables" if corr else None))    
         
     if model_type in _DICHOTOMOUS:
-        # generate item intercept for dichotomous models
-        intercept_prior = model_type_kwargs.pop("intercept_prior", None)
-        intercept_prior = dist.Normal(0, 2) if intercept_prior is None else intercept_prior
-        full_rank = [Linear(
-            "item_intercept", predictors="one_",
-            coef=Param(intercept_prior, by_group="free", by_variable="free"),
-        ), *item_terms]
+        full_rank = [*item_terms]
         family_fn = _dichotomous(model_type, **model_type_kwargs)
     elif model_type == "GRM":
         full_rank = [*item_terms]
@@ -137,8 +132,9 @@ def dynamirt(
         "theta": ["obs", "latent"],
         "loadings": ["item", "latent"],
         "Y": ["obs", "item"],
-        **{f"{term.name}_latent": ["obs", "latent"] for term in latent_contribution},
-        **{f"{term.name}_eta": ["obs", "item"] for term in full_rank},
+        **({"measurement.intercept": ["item"]} if model_type in _DICHOTOMOUS else {}),
+        **{f"latent.{term.name}.contribution": ["obs", "latent"] for term in latent_contribution},
+        **{f"item.{term.name}.contribution": ["obs", "item"] for term in full_rank},
     }
     
     # could be removed and recovered from partial keywords?

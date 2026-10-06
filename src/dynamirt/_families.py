@@ -1,5 +1,4 @@
 from .gllvm.context import ModelContext
-from .gllvm.families import Bernoulli
 
 import jax
 import jax.numpy as jnp
@@ -14,7 +13,8 @@ from typing import Literal
 def _dichotomous(
     model_type: Literal["1PL", "2PL", "3PL", "4PL"],
     lower_asymptote_prior: dist.Distribution = None,
-    upper_asymptote_gap_prior: dist.Distribution = None
+    upper_asymptote_gap_prior: dist.Distribution = None,
+    intercept_prior: dist.Distribution = None,
     ):
     
     """Compute likelihood for 1PL, 2PL, 3PL, 4PL models"""
@@ -22,17 +22,19 @@ def _dichotomous(
     lower_asymptote_prior = dist.Beta(2, 8) if lower_asymptote_prior is None else lower_asymptote_prior
     upper_asymptote_gap_prior = dist.Beta(8, 2) if upper_asymptote_gap_prior is None else upper_asymptote_gap_prior
 
-    if model_type in ["1PL", "2PL"]:
-        return Bernoulli()
+    intercept_prior = dist.Normal(0, 2) if intercept_prior is None else intercept_prior
 
     def family(eta: ArrayLike, ctx: ModelContext):
-        
+        intercept = numpyro.sample("intercept", intercept_prior.expand((ctx.n_var,)).to_event(1))
+        eta = eta + intercept
+        if model_type in ["1PL", "2PL"]:
+            return dist.Bernoulli(logits=eta)
 
         la = numpyro.sample("lower_asymptote", lower_asymptote_prior.expand((ctx.n_var,)).to_event(1))
 
         if model_type == "4PL":
-            # sample gap between ua and la so la > ua can never happen
-            gap = numpyro.sample("asymptote_gap", upper_asymptote_gap_prior.expand((ctx.n_var,)).to_event(1))
+            # sample a fraction of the remaining interval so ua stays above la
+            gap = numpyro.sample("upper_asymptote_fraction", upper_asymptote_gap_prior.expand((ctx.n_var,)).to_event(1))
             ua = numpyro.deterministic("upper_asymptote", la + (1.0 - la) * gap)
         else:
             ua = 1.0
@@ -142,7 +144,7 @@ def _partial_credit(n_cat, *, step_prior=None):
         if counts.ndim and counts.shape != (ctx.n_var,):
             raise ValueError("n_cat must have one count per item")
         if counts.ndim:
-            raw = numpyro.sample("steps_raw", step_prior.expand((len(item),)).to_event(1))
+            raw = numpyro.sample("steps.raw", step_prior.expand((len(item),)).to_event(1))
             d = numpyro.deterministic(
                 "steps", jnp.zeros(valid.shape).at[item, threshold].set(raw)
             )
