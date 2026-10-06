@@ -17,8 +17,8 @@ def dynamirt(
     model_type: Literal["1PL", "2PL", "3PL", "4PL", "GRM", "PCM", "GPCM"]="2PL",
     n_latent: int =1,
     loadings: Callable | None =None,
-    latent_fn: Sequence[Callable] | None =None,
-    DIF: Sequence[Callable] | None =None,
+    latent_terms: Sequence[Callable] | None =None,
+    item_terms: Sequence[Callable] | None =None,
     include_residuals: bool | None =None,
     corr: bool = False,
     model_type_kwargs: dict | None =None,
@@ -42,15 +42,15 @@ def dynamirt(
             ``Full(LogNormal(0, 0.5))`` for one latent dimension and ``Full()``
             otherwise. Positive defaults assume consistently coded items.
             ``"1PL"`` and ``"PCM"`` force ``Fixed()``.
-        latent_fn: Sequence of latent-regression term callables (e.g.
+        latent_terms: Sequence of latent-regression term callables (e.g.
             time-series terms, covariate effects on theta). If None
             and ``include_residuals`` is not explicitly False, an
             i.i.d. residual term is added automatically.
-        DIF: Sequence of full-rank regression term callables added
+        item_terms: Sequence of full-rank regression term callables added
             alongside the item intercepts to model differential item
             functioning. Defaults to None.
         include_residuals: Whether to append an i.i.d. residual latent
-            term. Defaults to True when ``latent_fn`` is None,
+            term. Defaults to True when ``latent_terms`` is None,
             False otherwise.
         corr: If True and residuals are included, an LKJ-Cholesky
             correlation structure is estimated across latent
@@ -73,7 +73,7 @@ def dynamirt(
         ValueError: If ``loadings`` is provided for ``"1PL"`` or
             ``"PCM"`` (these fix all loadings to 1).
         ValueError: If no latent terms would be active (both
-            ``latent_fn`` and ``include_residuals`` are empty/False).
+            ``latent_terms`` and ``include_residuals`` are empty/False).
         ValueError: If ``model_type`` is not recognised.
     """
     
@@ -86,16 +86,16 @@ def dynamirt(
     if loadings is None:
         loadings = Full(dist.LogNormal(0, 0.5)) if n_latent == 1 else Full()
     
-    latent_contribution = [] if latent_fn is None else list(latent_fn)
-    DIF = [] if DIF is None else list(DIF)
+    latent_contribution = [] if latent_terms is None else list(latent_terms)
+    item_terms = [] if item_terms is None else list(item_terms)
     model_type_kwargs = {} if model_type_kwargs is None else dict(model_type_kwargs)
     
-    # by default do not include residuals when latent_fn is explicitly modeled.
+    # by default do not include residuals when latent_terms is explicitly modeled.
     if include_residuals is None:
         include_residuals = not latent_contribution
 
     if not include_residuals and not latent_contribution:
-        raise ValueError("No latent terms: set include_residuals=True or pass latent_fn.")
+        raise ValueError("No latent terms: set include_residuals=True or pass latent_terms.")
 
     # ----------------- model construction -----------------
     if include_residuals:
@@ -109,14 +109,14 @@ def dynamirt(
         full_rank = [Linear(
             "item_intercept", predictors="one_",
             coef=Param(intercept_prior, by_group="free", by_variable="free"),
-        ), *DIF]
+        ), *item_terms]
         family_fn = _dichotomous(model_type, **model_type_kwargs)
     elif model_type == "GRM":
-        full_rank = [*DIF]
+        full_rank = [*item_terms]
         family_fn = _grm(**model_type_kwargs)
     elif model_type in ["PCM", "GPCM"]:
         # polytomous models create their own intercepts in their family_fn
-        full_rank = [*DIF]
+        full_rank = [*item_terms]
         family_fn = _partial_credit(**model_type_kwargs)
     else:
         raise ValueError(f"Unknown model type {model_type}")    
