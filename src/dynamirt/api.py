@@ -1,11 +1,13 @@
 from .gllvm.model import gllvm
 from .gllvm.terms.linear import Linear
+from .gllvm.parameters import Param
 
 from .gllvm.loadings import Full, Fixed
 
 from ._families import _dichotomous, _grm, _partial_credit
 
 from functools import partial
+import numpyro.distributions as dist
 
 from typing import Sequence, Callable, Literal, Mapping
 
@@ -36,9 +38,10 @@ def dynamirt(
         n_latent: Dimensionality of the latent trait space. Defaults
             to 1.
         loadings: Loading-matrix factory (e.g. ``Fixed()``,
-            ``Full()``, ``Confirmatory(Q)``). Defaults to ``Full()``
-            (unconstrained), except for ``"1PL"`` and ``"PCM"`` where
-            it is forced to ``Fixed()``.
+            ``Full()``, ``Confirmatory(Q)``). Omitted loadings use
+            ``Full(LogNormal(0, 0.5))`` for one latent dimension and ``Full()``
+            otherwise. Positive defaults assume consistently coded items.
+            ``"1PL"`` and ``"PCM"`` force ``Fixed()``.
         latent_fn: Sequence of latent-regression term callables (e.g.
             time-series terms, covariate effects on theta). If None
             and ``include_residuals`` is not explicitly False, an
@@ -55,7 +58,9 @@ def dynamirt(
         model_type_kwargs: Extra keyword arguments forwarded to the
             IRT family constructor for `model_type`. For polytomous models,
             ``n_cat`` is required. It is an integer or a sequence of counts 
-            in item-column order.
+            in item-column order. Dichotomous models accept ``intercept_prior``
+            (default Normal(0, 2)); PCM/GPCM accept ``step_prior``
+            (default Normal(0, 2)).
         index_sizes: Fixed sizes for integer-coded grouping and discrete-time
             covariates, e.g. {"clinic": 12, "time": 20}. Required for named
             group_by/order_by axes; row_ is supplied automatically.
@@ -78,11 +83,12 @@ def dynamirt(
             raise ValueError("1PL/PCM fixes the loadings. drop `loadings` or use 2PL/GPCM.")
         loadings = Fixed()
     
-    loadings = Full() if loadings is None else loadings
+    if loadings is None:
+        loadings = Full(dist.LogNormal(0, 0.5)) if n_latent == 1 else Full()
     
     latent_contribution = [] if latent_fn is None else list(latent_fn)
     DIF = [] if DIF is None else list(DIF)
-    model_type_kwargs = {} if model_type_kwargs is None else model_type_kwargs
+    model_type_kwargs = {} if model_type_kwargs is None else dict(model_type_kwargs)
     
     # by default do not include residuals when latent_fn is explicitly modeled.
     if include_residuals is None:
@@ -93,12 +99,17 @@ def dynamirt(
 
     # ----------------- model construction -----------------
     if include_residuals:
-        # estimate correlation between latents by default
+        # do not estimate correlation between latents by default
         latent_contribution.append(Linear("residuals", predictors="one_", group_by="row_", corr="variables" if corr else None))    
         
     if model_type in _DICHOTOMOUS:
         # generate item intercept for dichotomous models
-        full_rank = [Linear("item_intercept", predictors="one_"), *DIF]
+        intercept_prior = model_type_kwargs.pop("intercept_prior", None)
+        intercept_prior = dist.Normal(0, 2) if intercept_prior is None else intercept_prior
+        full_rank = [Linear(
+            "item_intercept", predictors="one_",
+            coef=Param(intercept_prior, by_group="free", by_variable="free"),
+        ), *DIF]
         family_fn = _dichotomous(model_type, **model_type_kwargs)
     elif model_type == "GRM":
         full_rank = [*DIF]
@@ -108,7 +119,7 @@ def dynamirt(
         full_rank = [*DIF]
         family_fn = _partial_credit(**model_type_kwargs)
     else:
-        raise ValueError(f"Unkown model type {model_type}")    
+        raise ValueError(f"Unknown model type {model_type}")    
     
     model = partial(
         gllvm,
