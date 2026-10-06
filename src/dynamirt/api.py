@@ -55,8 +55,8 @@ def dynamirt(
             dimensions. Defaults to False.
         model_type_kwargs: Extra keyword arguments forwarded to the
             IRT family constructor for `model_type`. For polytomous models,
-            ``n_cat`` is an integer or a sequence of counts in item-column
-            order.
+            ``n_cat`` is required. It is an integer or a sequence of counts 
+            in item-column order.
         index_sizes: Fixed sizes for integer-coded grouping and discrete-time
             covariates, e.g. {"clinic": 12, "time": 20}. Required for named
             group_by/order_by axes; row_ is supplied automatically.
