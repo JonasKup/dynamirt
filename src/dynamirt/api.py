@@ -64,7 +64,7 @@ def dynamirt(
             (default Normal(0, 2)).
         index_sizes: Fixed sizes for integer-coded grouping and discrete-time
             covariates, e.g. {"clinic": 12, "time": 20}. Required for named
-            group_by/order_by axes; row_ is supplied automatically.
+            group_by/order_by axes; ``obs_`` is supplied automatically.
         
     Returns:
         A numpyro function with signature ``model(responses, covariates, ...)``
@@ -101,7 +101,7 @@ def dynamirt(
     # ----------------- model construction -----------------
     if include_residuals:
         # do not estimate correlation between latents by default
-        latent_contribution.append(Linear("residuals", predictors="one_", group_by="row_", corr="variables" if corr else None))    
+        latent_contribution.append(Linear("residuals", predictors="one_", group_by="obs_", corr="variables" if corr else None))
         
     if model_type in _DICHOTOMOUS:
         full_rank = [*item_terms]

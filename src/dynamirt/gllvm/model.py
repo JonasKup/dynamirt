@@ -52,7 +52,7 @@ def gllvm(
             which case n_obs and n_var must be given explicitly.
         covariates: Mapping from covariate name to array of length n_obs
             (or broadcastable scalar). Two keys are added automatically:
-            ``"one_"`` (constant 1, for intercepts) and ``"row_"``
+            ``"one_"`` (constant 1, for intercepts) and ``"obs_"``
             (observation index, a stand-in for a respondent ID when
             n_obs equals the number of respondents).
         family: Called as ``family(mu, ctx)`` and must return a
@@ -75,7 +75,7 @@ def gllvm(
             stores the latent scores u. Defaults to ``"u"``.
         index_sizes: Fixed sizes of named integer-coded grouping and time
             axes. Codes may select any subset of 0,...,size-1. The reserved
-            row_ axis is set automatically to n_obs.
+            obs_ axis is set automatically to n_obs.
     """
     
     if responses is None and (n_obs is None or n_var is None):
@@ -91,7 +91,7 @@ def gllvm(
         
     covariates = {**covariates,
                   "one_": np.array([1.0]),  # for intercepts
-                  "row_": np.arange(n_obs)} # stand-in for ID column in scenarios w/o repeated measures where n_obs == n_site/respondent
+                  "obs_": np.arange(n_obs)} # stand-in for ID column in scenarios w/o repeated measures where n_obs == n_site/respondent
         
     ctx = ModelContext(
         responses,
@@ -99,7 +99,7 @@ def gllvm(
         n_obs, 
         n_var, 
         n_latent,
-        index_sizes={**(index_sizes or {}), "row_": n_obs},
+        index_sizes={**(index_sizes or {}), "obs_": n_obs},
         ) # context to pass to subfunctions like term and family
     
     # full-rank regression (DIF under IRT)
