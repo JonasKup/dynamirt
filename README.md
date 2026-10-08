@@ -4,7 +4,7 @@
 multidimensional [item response theory](https://en.wikipedia.org/wiki/Item_response_theory) (MIRT). 
 It provides an interface to the most common IRT measurement models and lets you freely specify the functional 
 form of the latent construct. 
-The built-ins (GPs, HSGPs) make it heavily geared toward repeated binary
+The built-ins (GPs, HSGPs) make it geared toward repeated binary
 or ordinal item responses collected at irregular times, including ragged
 panel and ecological momentary assessment (EMA) data where respondents have different numbers and schedules of
 observations.
