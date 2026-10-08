@@ -19,6 +19,20 @@ Gaussian processes. Models are fitted with MCMC or SVI.
 
 .. toctree::
    :maxdepth: 1
+   :caption: User guide
+
+   overview
+   guide/models
+   guide/terms
+   guide/custom_terms
+   guide/parameters
+   guide/fitting
+   guide/plots
+   guide/trace_names
+   guide/gllvm
+
+.. toctree::
+   :maxdepth: 1
    :caption: Tutorials
 
    tutorials/tutorial_static
@@ -26,13 +40,7 @@ Gaussian processes. Models are fitted with MCMC or SVI.
    tutorials/tutorial_NODE
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :caption: API reference
 
-   api/model
-   api/fitting
-   api/terms
-   api/loadings
-   api/parameters
-   api/diagnostics
-   api/custom
+   api/index

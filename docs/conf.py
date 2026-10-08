@@ -19,7 +19,7 @@ release = '0.1.0'
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ["sphinx.ext.autodoc", "sphinx.ext.napoleon", "sphinx.ext.viewcode", "myst_nb"]
+extensions = ["sphinx.ext.autodoc", "sphinx.ext.autosummary", "sphinx.ext.napoleon", "sphinx.ext.viewcode", "myst_nb"]
 
 # Tutorial notebooks are rendered with their saved outputs and never executed
 # during the build. Re-run them manually in Jupyter to update the docs.
@@ -28,6 +28,11 @@ myst_enable_extensions = ["dollarmath", "deflist"]
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '**.ipynb_checkpoints']
+
+autosummary_generate = True
+autodoc_typehints = "description"
+autodoc_typehints_description_target = "documented"
+autodoc_preserve_defaults = True
 
 napoleon_use_ivar = True
 

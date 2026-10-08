@@ -36,15 +36,17 @@ Key arguments:
 
 `loadings`
 : Structure of the item-by-latent loading matrix: `Full()`, `Fixed()`,
-  `Confirmatory(Q)` or `Sparsity()` (experimental). Defaults to `Full()`.
+  `Confirmatory(Q)` or `Sparsity()` (experimental). Omitted loadings use
+  `Full(LogNormal(0, 0.5))` for one factor (consistently coded items), otherwise
+  `Full()`.
   1PL and PCM always use `Fixed()`.
 
-`latent_fn`
+`latent_terms`
 : A list of additive terms defining the latent scores, e.g. `Linear`,
   `GRW`, `AR1`, `GP`, `HSGP` or `CustomTerm`. If omitted, each row gets
   an independent latent score.
 
-`DIF`
+`item_terms`
 : A list of terms that act directly on the items, to model differential item
   functioning.
 
@@ -66,6 +68,12 @@ Key arguments:
 
 See the tutorials for complete static and longitudinal examples.
 
+Ordinal models require `model_type_kwargs={"n_cat": ...}`. GRM uses a Dirichlet
+prior with `alpha=1.0` per category; vector `alpha` requires equal category counts.
+Its samples are `baseline_probs` (or `baseline_probs_<count>` for count vectors),
+with derived `cutpoints`. PCM/GPCM accept `step_prior`, defaulting to Normal(0, 2).
+Dichotomous models accept `intercept_prior`, also defaulting to Normal(0, 2).
+
 ## Integer-coded groups and time steps
 
 For `group_by` and the discrete-time `order_by` arguments of `GRW`/`AR1`,
@@ -76,14 +84,14 @@ from dynamirt import Linear, GRW
 
 model = dynamirt(
     index_sizes={"clinic": 12, "time_step": 20},
-    latent_fn=[GRW("trajectory", order_by="time_step", group_by="clinic")],
-    DIF=[Linear("clinic_dif", group_by="clinic", constraint="reference_coding")],
+    latent_terms=[GRW("trajectory", order_by="time_step", group_by="clinic")],
+    item_terms=[Linear("clinic_dif", group_by="clinic", constraint="reference_coding")],
 )
 ```
 
 Codes must lie in `0, ..., size - 1`. A scalar code broadcasts to all rows;
 subsets and unused levels are allowed without changing parameter dimensions.
-Reference coding always fixes code `0` to zero. `row_` and its size are supplied
+Reference coding always fixes code `0` to zero. `obs_` and its size are supplied
 automatically, so ordinary observation-level residuals need no configuration.
 GP/HSGP predictors remain continuous; only their grouping covariates need codes.
 GRW/AR1 time codes represent equally spaced latent steps. Missing observation
