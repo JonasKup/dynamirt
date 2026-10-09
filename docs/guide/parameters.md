@@ -83,6 +83,6 @@ HSGP(
 
 This last example introduces non-centered hierarchical pooling on the the respondent axis. In total there will be `n_latent * n_respondent + 2 * n_latent` sampled parameters: raw draws `(n_respondent, n_latent)` and a population-level mean and scale `(1, n_latent)` each. The exponential transform keeps the resulting length scales positive. The default priors for the hyper mean and scale are `Normal(0,1)` and `HalfNormal(0.5)` respectively. They can be adjusted through {py:class}`Pool() <dynamirt.Pool>`.
 
-Pooling across latent dimensions with relatively few dimensions seems hardly necessary at first, however, if used in `item_terms` instead, it can be used to introduce shrinkage over the items axis which might be desirable for differential item functioning.
+Pooling across latent dimensions with relatively few dimensions by setting `by_variable=Pool()` seems hardly necessary at first, however, if used in `item_terms` instead of `latent_terms`, it can be used to introduce shrinkage over the item axis which might be desirable for differential item functioning.
 
 [Covariates & Built-In Terms](terms.md) · [Custom Terms](custom_terms.md)

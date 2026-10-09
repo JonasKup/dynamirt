@@ -27,7 +27,7 @@ nb_execution_mode = "off"
 myst_enable_extensions = ["dollarmath", "deflist"]
 
 templates_path = ['_templates']
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', '**.ipynb_checkpoints']
+exclude_patterns = ['_build', '_readme.md', 'Thumbs.db', '.DS_Store', '**.ipynb_checkpoints']
 
 autosummary_generate = True
 autodoc_typehints = "description"
@@ -48,7 +48,21 @@ html_theme = 'sphinx_book_theme'
 html_static_path = ['_static']
 html_title = 'dynamirt'
 html_theme_options = {
+    "home_page_in_toc": True,
     "repository_url": "https://github.com/JonasKup/dynamirt",
     "repository_provider": "github",
     "use_repository_button": True,
 }
+
+
+# README HTML images retain their relative imgs/ URLs when included in the index.
+def copy_readme_images(app, exception):
+    if exception is None and app.builder.format == "html":
+        from shutil import copytree
+
+        copytree(Path(app.confdir).parent / "imgs", Path(app.outdir) / "imgs",
+                 dirs_exist_ok=True)
+
+
+def setup(app):
+    app.connect("build-finished", copy_readme_images)

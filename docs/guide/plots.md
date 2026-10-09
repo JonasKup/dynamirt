@@ -47,7 +47,7 @@ Documentation on item curves in the presence of differential item functioning to
 
 ## Latent trajectories
 
-Because dynamirt is geared toward time series modeling, it also includes a helper to quickly plot latent trajectories over time for a single respondent. This is done through the {py:func}`plot_trajectories <dynamirt.plot_trajectories>` function. You need to specify the name of the covariate that responds to the time dimensions, as well as filter down the posterior to a single respondent through the `coords` keyword which will be a familiar workflow to ArviZ users.
+Because dynamirt is geared toward time series modeling, it also includes a helper to quickly plot latent trajectories over time for a single respondent. This is done through the {py:func}`plot_trajectories <dynamirt.plot_trajectories>` function. You need to specify the name of the covariate that corresponds to the time dimensions, as well as filter down the posterior to a single respondent through the `coords` keyword which will be a familiar workflow to ArviZ users.
 
 ```python
 import numpy as np

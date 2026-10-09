@@ -10,7 +10,7 @@ fit = fit_mcmc(model, responses)
 idata = fit.to_idata()
 ```
 
-Here, `responses` is your data, an `(n_obs, n_items)` array. Binary items are coded 0/1,
+Here, `responses` are your data, an `(n_obs, n_items)` array. Binary items are coded 0/1,
 ordinal items use categories `0, ..., n_cat - 1` and missing responses are `np.nan`.
 The responses are assumed to be in [long format](https://en.wikipedia.org/wiki/Wide_and_narrow_data)
 with one row per observation occasion and one column per item.

@@ -1,15 +1,5 @@
 # Custom Terms
 
-The available built-in terms are:
-
-| Term | Description |
-|---|---|
-| {py:class}`Linear <dynamirt.Linear>` | Intercepts and linear effects |
-| {py:class}`GRW <dynamirt.GRW>` | Gaussian random walks on equally spaced steps |
-| {py:class}`AR1 <dynamirt.AR1>` | Stationary autoregressive processes on equally spaced steps |
-| {py:class}`GP <dynamirt.GP>` | Exact Gaussian processes |
-| {py:class}`HSGP <dynamirt.HSGP>` | Basis approximations to Gaussian processes |
-
 While the built-ins lean toward time series modeling, they don't exhaustively cover all longitudinal models you may want to build and maybe you want to build something else entirely (e.g., a spatial model). 
 
 Creating custom terms is relatively straight forward because you just need to write a NumPyro/JAX function that implements your desired operation. The most important requirement for custom term functions is that they return their result as an array of shape `(n_obs, n_target)`. `n_target` should be the latent dimension if used as a `latent_term` or the number of items if used as an `item_term`. 
