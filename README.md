@@ -33,14 +33,33 @@ https://dynamirt.readthedocs.io/
 
 ## Building a model
 
-`dynamirt()` builds a NumPyro model from a measurement model and a latent
-model. It returns a model callable, which you fit with `fit_mcmc` or `fit_svi`:
+`dynamirt()` builds a NumPyro model from a measurement model and an optional combination of latent terms. It returns a model callable, which you fit with `fit_mcmc` or `fit_svi`:
+
+### A Static Unidimensional IRT model
 
 ```python
-from dynamirt import dynamirt, fit_mcmc, Confirmatory
+from dynamirt import dynamirt, fit_mcmc
 
-model = dynamirt(model_type="2PL", n_latent=2, loadings=Confirmatory(Q, positive=Q))
-fit = fit_mcmc(model, responses, covariates)
+model = dynamirt(model_type="2PL")
+fit = fit_mcmc(model, responses)
+idata = fit.to_idata()
+```
+
+### A Longitudinal IRT Model using HSGPs
+
+```python
+from dynamirt import dynamirt, HSGP, fit_mcmc
+
+model = dynamirt(
+    model_type="2PL",
+    latent_terms=[
+        HSGP("trajectory", predictors="time", group_by="respondent",
+             kernel="Matern", ell=1.5, m=30),
+    ],
+    index_sizes={"respondent": n_respondents},
+)
+
+fit = fit_mcmc(model, responses, {"time": time, "respondent": respondent_ids})
 idata = fit.to_idata()
 ```
 
